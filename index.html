@@ -160,7 +160,7 @@ addBtn.onclick = () => {
   reader.onload = () => {
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `
+    card.innerHTML += `
       <img src="${reader.result}" alt="صورة">
       <h3>تصميم جديد</h3>
       <p>تم الرفع للتو</p>
