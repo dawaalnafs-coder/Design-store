@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>متجر التصميمات</title>
+  <title>مدونة التصميمات</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,11 +25,11 @@
       text-align: center;
     }
 
-    .container {
+    . gallery {
       padding: 20px;
     }
 
-    .products {
+    .posts {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 15px;
@@ -48,7 +48,7 @@
       border-radius: 10px;
     }
 
-    button {
+    .btn {
       background: #2575fc;
       color: white;
       border: none;
@@ -59,71 +59,46 @@
       cursor: pointer;
     }
 
-    button:hover {
+    .btn:hover {
       background: #1a5edb;
-    }
-
-    .cart {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: #111;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 10px;
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>متجر التصميمات</h1>
+  <h1>معرض التصميمات</h1>
 </header>
 
 <section class="hero">
   <h2>أحدث التصميمات الاحترافية</h2>
-  <p>اشترِ تصاميم جاهزة لمشاريعك أو تسويقك</p>
+  <p>ألق بصرك </p> 
 </section>
 
-<div class="container">
-  <div class="products">
+<div class="gallery">
+  <div class="posts">
 
-    <div class="card">
+    <div class="btn">
       <img src="https://via.placeholder.com/300" alt="تصميم 1">
       <h3>تصميم سوشيال ميديا</h3>
       <p>جاهز للنشر على إنستغرام</p>
-      <button onclick="addToCart()">أضف للسلة</button>
+      <a href="#" class="btn">اقرأ المزيد</a>
     </div>
 
-    <div class="card">
+    <div class="btn">
       <img src="https://via.placeholder.com/300" alt="تصميم 2">
       <h3>لوجو احترافي</h3>
       <p>تصميم شعار عصري</p>
-      <button onclick="addToCart()">أضف للسلة</button>
+      <a href="#" class="btn">اقرأ المزيد</a>
     </div>
 
     <div class="card">
       <img src="https://via.placeholder.com/300" alt="تصميم 3">
       <h3>بوستر إعلاني</h3>
       <p>تصميم تسويقي جذاب</p>
-      <button onclick="addToCart()">أضف للسلة</button>
+      <a href="#" class="btn">اقرأ المزيد</a>
     </div>
-
   </div>
 </div>
-
-<div class="cart" id="cart">
-  السلة: 0
-</div>
-
-<script>
-  let count = 0;
-
-  function addToCart() {
-    count++;
-    document.getElementById('cart').innerText = 'السلة: ' + count;
-  }
-</script>
-
 </body>
 </html>
