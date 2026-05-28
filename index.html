@@ -156,15 +156,13 @@ addBtn.onclick = () => {
     alert('اختر صورة أول');
     return;
   }
-
-  const width = imgWidth.value || 300;
   const reader = new FileReader();
 
   reader.onload = () => {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <img src="${reader.result}" style="width:${width}px; max-width:100%;">
+      <img src="${reader.result}" alt="صورة">
       <h3>تصميم جديد</h3>
       <p>تم الرفع للتو</p>
       <a href="#" class="btn">اقرأ المزيد</a>
