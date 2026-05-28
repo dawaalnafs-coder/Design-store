@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css">
   <title>مدونة التصميمات</title>
   <style>
     body {
@@ -25,7 +26,7 @@
       text-align: center;
     }
 
-    . gallery {
+    .gallery {
       padding: 20px;
     }
 
@@ -36,29 +37,66 @@
     }
 
     .card {
-      background: white;
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      text-align: center;
+  background: white;
+  color: #333;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  width: 250px;
+  text-align: center;
+  margin-top: 10px;
+    }
     }
 
     .card img {
-      width: 100%;
+      max-width: 100%;
       border-radius: 10px;
     }
+.upload-box {
+  margin: 20px auto;
+  padding: 20px;
+  border: 2px dashed #2575fc;
+  border-radius: 15px;
+  text-align: center;
+  background: #f7f9ff;
+  max-width: 500px;
+}
 
-    .btn {
-      background: #2575fc;
-      color: white;
-      border: none;
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+.upload-box input[type="file"] {
+  margin: 10px 5px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
 
+.upload-box input[type="number"] {
+  margin: 10px 5px;
+  padding: 8px;
+  width: 120px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.upload-box button {
+  background: #2575fc;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.upload-box button:hover {
+  background: #1e5fd9;
+}
+
+#previewArea {
+  gap: 15px;
+  margin-top: 20px;
+  justify-content: center;
+  }
+    
     .btn:hover {
       background: #1a5edb;
     }
@@ -76,16 +114,22 @@
 </section>
 
 <div class="gallery">
-  <div class="posts">
+ 
+      <div class="upload-box">
+    <input type="file" id="fileUpload" accept="image/*">
+    <input type="number" id="imgWidth" placeholder="العرض بالبكسل" value="300">
+    <button id="addBtn">إضافة للمعرض</button>
+ 
+  <div class="posts" id="previewArea">
 
-    <div class="btn">
+   <div class="card">
       <img src="https://via.placeholder.com/300" alt="تصميم 1">
       <h3>تصميم سوشيال ميديا</h3>
       <p>جاهز للنشر على إنستغرام</p>
       <a href="#" class="btn">اقرأ المزيد</a>
     </div>
 
-    <div class="btn">
+    <div class="card">
       <img src="https://via.placeholder.com/300" alt="تصميم 2">
       <h3>لوجو احترافي</h3>
       <p>تصميم شعار عصري</p>
@@ -100,5 +144,40 @@
     </div>
   </div>
 </div>
+<script 
+const fileUpload = document.getElementById('fileUpload');
+const imgWidth = document.getElementById('imgWidth');
+const addBtn = document.getElementById('addBtn');
+const posts = document.getElementById('previewArea');
+
+addBtn.onclick = () => {
+  const file = fileUpload.files[0];
+  if (!file) {
+    alert('اختر صورة أول');
+    return;
+  }
+
+  const width = imgWidth.value || 300;
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${reader.result}" style="width:${width}px; max-width:100%;">
+      <h3>تصميم جديد</h3>
+      <p>تم الرفع للتو</p>
+      <a href="#" class="btn">اقرأ المزيد</a>
+    `;
+
+    posts.appendChild(card);
+    fileUpload.value = '';
+  };
+
+  reader.readAsDataURL(file);
+};
+
+  src="script.js">
+</script>
 </body>
 </html>
