@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>المدونة - alnafs coder</title>
+  <style>
+    body { font-family: Arial; background: #f5f5f5; margin: 0; padding: 20px; }
+    
+    /* القائمة - نفس اللي في index.html */
+    .navbar { background: #1a1a2e; padding: 15px; text-align: center; margin: -20px -20px 30px -20px; }
+    .navbar a { color: white; margin: 0 15px; text-decoration: none; font-size: 18px; }
+    .navbar a:hover { color: #7f5af0; }
+    
+    /* صندوق البحث */
+    #searchInput { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 30px; }
+    
+    /* الأقسام */
+    .category { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .category h2 { color: #1a1a2e; border-bottom: 3px solid #7f5af0; padding-bottom: 10px; }
+    .post { padding: 10px 0; border-bottom: 1px solid #eee; }
+    .post a { text-decoration: none; color: #333; font-size: 18px; }
+    .post a:hover { color: #7f5af0; }
+  </style>
+</head>
+<body>
 
+  <!-- 1. القائمة -->
+  <nav class="navbar">
+    <a href="index.html">الرئيسية</a>
+    <a href="blog.html">المدونة</a>
+    <a href="about.html">من نحن</a>
+  </nav>
+
+  <h1>مدونة التصميمات</h1>
+  
+  <!-- 2. مربع البحث -->
+  <input type="text" id="searchInput" placeholder="🔍 ابحث عن مقال...">
+
+  <!-- 3. الأقسام -->
+  <div id="posts">
+    
+    <div class="category">
+      <h2>قسم التصاميم</h2>
+      <div class="post" data-title="كيف تصمم لوجو احترافي">
+        <a href="posts.html">كيف تصمم لوجو احترافي</a>
+      </div>
+      <div class="post" data-title="ألوان احترافية للموقع">
+        <a href="#">ألوان احترافية للموقع</a>
+      </div>
+    </div>
+
+    <div class="category">
+      <h2>قسم الصور</h2>
+      <div class="post" data-title="تعديل الصور بفوتوبيا">
+        <a href="#">تعديل الصور بفوتوبيا Photopea</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 4. كود البحث الجافاسكربت -->
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const posts = document.querySelectorAll('.post');
+
+    searchInput.addEventListener('keyup', function() {
+      const searchText = this.value.toLowerCase();
+      
+      posts.forEach(function(post) {
+        const title = post.getAttribute('data-title').toLowerCase();
+        if (title.includes(searchText)) {
+          post.style.display = 'block';
+        } else {
+          post.style.display = 'none';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
