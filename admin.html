@@ -1,54 +1,52 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl">
 <head>
 <meta charset="UTF-8">
 <title>لوحة التحكم</title>
 <style>
-  body{font-family:tahoma;padding:20px;background:#f5f5f5}
-  input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px}
-  button{background:#6a5af9;color:white;border:none;padding:12px 20px;border-radius:5px;cursor:pointer}
-  .code-box{background:#222;color:#0f0;padding:15px;margin-top:15px;direction:ltr;text-align:left;white-space:pre-wrap;border-radius:5px}
-  .hint{background:#fff3cd;padding:10px;border-radius:5px;margin-top:10px;font-size:14px}
+body{font-family:tahoma;padding:20px;background:#f5f5f5}
+input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px}
+button{background:#7c3aed;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer}
+button:hover{background:#6d28d9}
+.container{max-width:500px;margin:auto;background:white;padding:20px;border-radius:12px}
 </style>
 </head>
 <body>
-  <h2>➕ إضافة منشور جديد</h2>
-  
-  <input id="title" placeholder="عنوان المنشور">
-  <input id="img" placeholder="رابط الصورة">
-  <textarea id="desc" placeholder="الوصف" rows="4"></textarea>
-  <button onclick="addPost()">إضافة الكود</button>
-  
-  <div id="output" class="code-box" style="display:none"></div>
-  
-  <div class="hint">
-    <b>كيف تحذف منشور؟</b><br>
-    1. افتح index.html واضغط القلم ✏️<br>
-    2. دور على &lt;article class="post"&gt; حق المنشور<br>
-    3. احذف من &lt;article&gt; لين &lt;/article&gt; كامل<br>
-    4. Commit changes
-  </div>
+<div class="container">
+<h2>إضافة منشور جديد</h2>
+<input type="text" id="title" placeholder="عنوان المنشور">
+<input type="text" id="image" placeholder="رابط الصورة المباشر">
+<textarea id="desc" placeholder="وصف المنشور" rows="4"></textarea>
+<button onclick="addPost()">حفظ في الموقع</button>
+<p id="msg"></p>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-function addPost(){
-  const t = document.getElementById('title').value.trim();
-  const i = document.getElementById('img').value.trim();
-  const d = document.getElementById('desc').value.trim();
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+async function addPost(){
+  const title = document.getElementById('title').value
+  const image_url = document.getElementById('image').value
+  const description = document.getElementById('desc').value
   
-  if(!t || !i || !d){ alert('عبي كل الحقول'); return; }
+  if(!title || !image_url){
+    document.getElementById('msg').innerText = 'اكتب العنوان ورابط الصورة'
+    return
+  }
   
-  const code = `<article class="post">
-  <img src="${i}" alt="${t}">
-  <h3>${t}</h3>
-  <p>${d}</p>
-</article>`;
+  const { error } = await supabase.from('posts').insert([{title, image_url, description}])
   
-  document.getElementById('output').style.display = 'block';
-  document.getElementById('output').textContent = code;
-  
-  // ننسخ الكود تلقائي
-  navigator.clipboard.writeText(code);
-  alert('تم نسخ الكود! الحين روح index.html والصقه');
+  if(error){
+    document.getElementById('msg').innerText = 'خطأ: ' + error.message
+  } else {
+    document.getElementById('msg').innerText = 'تم الحفظ! ارجع للموقع وحدث الصفحة'
+    document.getElementById('title').value = ''
+    document.getElementById('image').value = ''
+    document.getElementById('desc').value = ''
+  }
 }
 </script>
 </body>
