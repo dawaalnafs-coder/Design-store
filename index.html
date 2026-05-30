@@ -70,28 +70,33 @@
   max-height: 60px;
   width: auto;
   }
- /* === ستايل المنيو === */
-nav {
-  display: flex;
-  flex-wrap: wrap; /* عشان لو الشاشة صغيرة ينزل سطر ثاني */
-  justify-content: center; /* الأزرار بالنص */
-  gap: 10px; /* المسافة بين كل زر والثاني */
-  padding: 15px;
-  background: #1a1a2e; /* نفس لون الهيدر عندك */
+ /* === المنيو تحت الصفحة === */
+.navbar {
+  background: #1a1a2e;
+  padding: 12px;
+  text-align: center;
+  position: fixed; /* يثبته */
+  bottom: 0; /* ينزله تحت */
+  left: 0;
+  width: 100%;
+  z-index: 999; /* عشان يطلع فوق الكروت */
 }
 
-nav a {
-  color: #fff;
+.navbar a {
+  color: white;
+  margin: 0 12px;
   text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 8px;
   font-size: 16px;
-  transition: 0.3s;
 }
 
-nav a:hover {
-  background: #0f3460; /* لما تحط الماوس على الزر يتغير لونه */
-  transform: scale(1.05);
+.navbar a:hover {
+  color: #7f5af0;
+}
+
+/* عشان المحتوى ما يختفي تحت المنيو */
+body {
+  padding-bottom: 60px; /* نفس ارتفاع المنيو تقريبا */
+}
 }
 .upload-box {
   margin: 20px auto;
