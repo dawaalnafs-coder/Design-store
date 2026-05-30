@@ -9,6 +9,7 @@
     input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
     button { background: #6b46c1; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; }
     h2 { color: #6b46c1; }
+    a { color: #6b46c1; text-decoration: none; display: inline-block; margin-top: 15px; }
   </style>
 </head>
 <body>
@@ -19,8 +20,10 @@
     <textarea id="desc" rows="4" placeholder="الوصف"></textarea>
     <button onclick="addPost()">إضافة</button>
     <hr>
-    <p>انسخ الكود اللي يطلع لك تحت والصقه في ملف index.html</p>
+    <p>انسخ الكود اللي يطلع لك تحت والصقه في ملف index.html داخل div.posts</p>
     <textarea id="output" rows="5" readonly></textarea>
+    <br>
+    <a href="index.html">← رجوع للموقع الرئيسي</a>
   </div>
 
   <script>
@@ -35,6 +38,9 @@
 </article>`;
       document.getElementById('output').value = code;
     }
+  </script>
+</body>
+</html>    }
   </script>
 </body>
 </html>
