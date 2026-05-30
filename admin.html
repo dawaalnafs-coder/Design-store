@@ -1,46 +1,55 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>لوحة التحكم - M&D</title>
-  <style>
-    body { font-family: Tahoma; background: #f5f5f5; padding: 30px; }
-    .box { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; }
-    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-    button { background: #6b46c1; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; }
-    h2 { color: #6b46c1; }
-    a { color: #6b46c1; text-decoration: none; display: inline-block; margin-top: 15px; }
-  </style>
+<meta charset="UTF-8">
+<title>لوحة التحكم</title>
+<style>
+  body{font-family:tahoma;padding:20px;background:#f5f5f5}
+  input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px}
+  button{background:#6a5af9;color:white;border:none;padding:12px 20px;border-radius:5px;cursor:pointer}
+  .code-box{background:#222;color:#0f0;padding:15px;margin-top:15px;direction:ltr;text-align:left;white-space:pre-wrap;border-radius:5px}
+  .hint{background:#fff3cd;padding:10px;border-radius:5px;margin-top:10px;font-size:14px}
+</style>
 </head>
 <body>
-  <div class="box">
-    <h2>إضافة منشور جديد</h2>
-    <input type="text" id="title" placeholder="العنوان">
-    <input type="text" id="img" placeholder="رابط الصورة">
-    <textarea id="desc" rows="4" placeholder="الوصف"></textarea>
-    <button onclick="addPost()">إضافة</button>
-    <hr>
-    <p>انسخ الكود اللي يطلع لك تحت والصقه في ملف index.html داخل div.posts</p>
-    <textarea id="output" rows="5" readonly></textarea>
-    <br>
-    <a href="index.html">← رجوع للموقع الرئيسي</a>
+  <h2>➕ إضافة منشور جديد</h2>
+  
+  <input id="title" placeholder="عنوان المنشور">
+  <input id="img" placeholder="رابط الصورة">
+  <textarea id="desc" placeholder="الوصف" rows="4"></textarea>
+  <button onclick="addPost()">إضافة الكود</button>
+  
+  <div id="output" class="code-box" style="display:none"></div>
+  
+  <div class="hint">
+    <b>كيف تحذف منشور؟</b><br>
+    1. افتح index.html واضغط القلم ✏️<br>
+    2. دور على &lt;article class="post"&gt; حق المنشور<br>
+    3. احذف من &lt;article&gt; لين &lt;/article&gt; كامل<br>
+    4. Commit changes
   </div>
 
-  <script>
-    function addPost() {
-      const t = document.getElementById('title').value;
-      const i = document.getElementById('img').value;
-      const d = document.getElementById('desc').value;
-      const code = `<article class="post">
+<script>
+function addPost(){
+  const t = document.getElementById('title').value.trim();
+  const i = document.getElementById('img').value.trim();
+  const d = document.getElementById('desc').value.trim();
+  
+  if(!t || !i || !d){ alert('عبي كل الحقول'); return; }
+  
+  const code = `<article class="post">
   <img src="${i}" alt="${t}">
   <h3>${t}</h3>
   <p>${d}</p>
 </article>`;
-      document.getElementById('output').value = code;
-    }
-  </script>
-</body>
-</html>    }
-  </script>
+  
+  document.getElementById('output').style.display = 'block';
+  document.getElementById('output').textContent = code;
+  
+  // ننسخ الكود تلقائي
+  navigator.clipboard.writeText(code);
+  alert('تم نسخ الكود! الحين روح index.html والصقه');
+}
+</script>
 </body>
 </html>
