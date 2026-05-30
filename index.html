@@ -187,14 +187,13 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 supabase.from('posts').select().order('id', {ascending: false}).then(({data})=>{
-  document.getElementById('posts').innerHTML = data.map(p=>`
+  document.getElementById('previewArea').innerHTML = data.map(p=>`
     <div class="card">
       <img src="${p.image_url}" />
       <h3>${p.title}</h3>
       <p>${p.description}</p>
     </div>
-  `).join('')
-})
+  .join('')
 </script>
 <div id="posts"></div>
 </body>
