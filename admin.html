@@ -1,48 +1,53 @@
 <!DOCTYPE html>
-<html dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>لوحة التحكم</title>
+<title>لوحة إضافة المنشورات</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{font-family:tahoma;padding:20px;background:#f5f5f5}
-input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px}
-button{background:#7c3aed;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer}
-button:hover{background:#6d28d9}
-.container{max-width:500px;margin:auto;background:white;padding:20px;border-radius:12px}
+body{font-family:Tahoma;background:#f4f4f4;padding:20px}
+.box{background:white;padding:20px;border-radius:10px;max-width:500px;margin:auto}
+input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px}
+button{background:#28a745;color:white;border:none;padding:12px;width:100%;border-radius:5px;cursor:pointer;font-size:16px}
+button:hover{background:#218838}
+#msg{margin-top:10px;font-weight:bold;text-align:center}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="box">
 <h2>إضافة منشور جديد</h2>
-<input type="text" id="title" placeholder="عنوان المنشور">
-<input type="text" id="image" placeholder="رابط الصورة المباشر">
+<input id="title" placeholder="عنوان المنشور">
+<input id="image" placeholder="رابط الصورة المباشر من postimg.cc">
 <textarea id="desc" placeholder="وصف المنشور" rows="4"></textarea>
 <button onclick="addPost()">حفظ في الموقع</button>
-<p id="msg"></p>
+<div id="msg"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+const SUPABASE_URL = 'حط-هنا-رابط-مشروعك.supabase.co'
+const SUPABASE_KEY = 'حط-هنا-m-anon-key'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 async function addPost(){
   const title = document.getElementById('title').value
   const image_url = document.getElementById('image').value
   const description = document.getElementById('desc').value
+  const msg = document.getElementById('msg')
   
-  if(!title || !image_url){
-    document.getElementById('msg').innerText = 'اكتب العنوان ورابط الصورة'
+  if(!title || !image_url || !description){
+    msg.innerText = 'املأ كل الحقول'
+    msg.style.color = 'red'
     return
   }
   
   const { error } = await supabase.from('posts').insert([{title, image_url, description}])
   
   if(error){
-    document.getElementById('msg').innerText = 'خطأ: ' + error.message
+    msg.innerText = 'خطأ: ' + error.message
+    msg.style.color = 'red'
   } else {
-    document.getElementById('msg').innerText = 'تم الحفظ! ارجع للموقع وحدث الصفحة'
+    msg.innerText = 'تم الحفظ بنجاح! ✅'
+    msg.style.color = 'green'
     document.getElementById('title').value = ''
     document.getElementById('image').value = ''
     document.getElementById('desc').value = ''
