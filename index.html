@@ -58,18 +58,32 @@
   font-size: 14px;
   color: #555;
 }
-
 /* === للكمبيوتر: كرتين جنب بعض === */
 @media (min-width: 768px) {
   .posts {
-    grid-template-columns: repeat(2, 1fr); /* كرتين جنب بعض */
+    margin: 20px auto; /* 20px فوق وتحت */
+    padding: 0 15px; /* يمين يسار عشان ما يلزق بالحواف */
+    grid-template-columns: repeat(2, 1fr);
     gap: 30px; /* فراغ أكبر للكمبيوتر */
   }
-}
+} /* هنا يقفل @media */
+
+/* === اللوجو === */
 .logo img {
   max-height: 60px;
-  width: auto;
-  }
+  width: auto; /* انتبه فاصلة منقوطة مو نقطتين */
+  display: block;
+  margin: 30px auto; /* يتوسط + فراغ فوق وتحت */
+}
+
+/* === البنر بالنص === */
+.banner {
+  max-width: 600px;
+  margin: 20px auto;
+  text-align: center;
+}
+/* حاوية الكروت */
+
  /* === المنيو تحت الصفحة === */
 .navbar {
   background: #1a1a2e;
