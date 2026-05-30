@@ -177,59 +177,33 @@ body {
   <p>اهلا وسهلا بكم</p> 
 </section>
 
-  <div class="posts" id="previewArea">
+<div class="posts" id="previewArea">
 
-<div class="card">
-  <img src="https://raw.githubusercontent.com/dawaalnafs-coder/Design-store/main/images/image-boy.png" alt="تصميم ولد">
-  <h3>تصميم ولد</h3>
-  <p>تصميم شخصية كرتونية</p>
-  <a href="#" class="btn">اقرأ المزيد</a>
 </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-    <div class="card">
-  <img src="https://raw.githubusercontent.com/dawaalnafs-coder/Design-store/main/images/image-design.png" alt="Learn with me">
-  <h3>تعلم معي</h3>
-  <p>تصميم تعليمي هندسي</p>
-  <a href="#" class="btn">اقرأ المزيد</a>
-      <article class="post">
-  <img src="https://files.catbox.moe/tro7vf.png" alt="الصبر">
-  <h3>الصبر</h3>
-  <p>استعن بالله ولا تعجز </p>
-</article>
-</div>
-  </div>
-</div>
-<script 
-const fileUpload = document.getElementById('fileUpload');
-const imgWidth = document.getElementById('imgWidth');
-const addBtn = document.getElementById('addBtn');
-const posts = document.getElementById('previewArea');
-
-addBtn.onclick = () => {
-  const file = fileUpload.files[0];
-  if (!file) {
-    alert('اختر صورة أول');
-    return;
+async function loadPosts(){
+  const { data } = await supabase.from('posts').select('*').order('created_at', {ascending:false})
+  const container = document.getElementById('previewArea')
+  if(!data || data.length === 0){
+    container.innerHTML = '<p style="text-align:center">لا توجد منشورات بعد</p>'
+    return
   }
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML += `
-      <img src="${reader.result}" alt="صورة">
-      <h3>تصميم جديد</h3>
-      <p>تم الرفع للتو</p>
+  container.innerHTML = data.map(p=>`
+    <div class="card">
+      <img src="${p.image_url}" alt="${p.title}">
+      <h3>${p.title}</h3>
+      <p>${p.description || ''}</p>
       <a href="#" class="btn">اقرأ المزيد</a>
-    `;
-
-    posts.appendChild(card);
-    fileUpload.value = '';
-  };
-
-  reader.readAsDataURL(file);
-};
-
-  src="script.js"></script>
+    </div>
+  `).join('')
+}
+loadPosts()
+</script>
 </body>
 </html>
