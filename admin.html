@@ -2,31 +2,25 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>لوحة إضافة المنشورات</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>لوحة التحكم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{font-family:Tahana;background:#f4f4f4;padding:20px}
-.box{background:white;padding:20px;border-radius:10px;max-width:500px;margin:auto}
+body{font-family:tahoma;background:#f5f5f5;padding:20px}
 input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px}
-button{background:#28a745;color:white;border:none;padding:12px;width:100%;border-radius:5px;cursor:pointer;font-size:16px}
-button:hover{background:#218838}
+button{background:#28a745;color:white;padding:12px;border:none;border-radius:5px;width:100%;font-size:16px}
 #msg{margin-top:10px;font-weight:bold;text-align:center}
 </style>
 </head>
 <body>
-<div class="box">
 <h2>إضافة منشور جديد</h2>
-<input id="title" placeholder="عنوان المنشور">
-<input id="image" placeholder="رابط الصورة المباشر من postimg.cc">
-<textarea id="desc" placeholder="وصف المنشور" rows="4"></textarea>
-<button onclick="addPost()">حفظ في الموقع</button>
+<input id="title" placeholder="العنوان">
+<input id="image" placeholder="رابط الصورة">
+<textarea id="desc" placeholder="الوصف"></textarea>
 <div id="msg"></div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<button onclick="addPost()">حفظ في الموقع</button>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  alert('الكود واصل لهنا')
-        console.log('الكود بدأ يشتغل')
 const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -42,6 +36,9 @@ async function addPost(){
     msg.style.color = 'red'
     return
   }
+  
+  msg.innerText = 'جاري الحفظ...'
+  msg.style.color = 'blue'
   
   const { error } = await supabase.from('posts').insert([{title, image_url, description}])
   
