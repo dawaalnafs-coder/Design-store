@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم - M&D</title>
+  <style>
+    body { font-family: Tahoma; background: #f5f5f5; padding: 30px; }
+    .box { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; }
+    input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+    button { background: #6b46c1; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; }
+    h2 { color: #6b46c1; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>إضافة منشور جديد</h2>
+    <input type="text" id="title" placeholder="العنوان">
+    <input type="text" id="img" placeholder="رابط الصورة">
+    <textarea id="desc" rows="4" placeholder="الوصف"></textarea>
+    <button onclick="addPost()">إضافة</button>
+    <hr>
+    <p>انسخ الكود اللي يطلع لك تحت والصقه في ملف index.html</p>
+    <textarea id="output" rows="5" readonly></textarea>
+  </div>
+
+  <script>
+    function addPost() {
+      const t = document.getElementById('title').value;
+      const i = document.getElementById('img').value;
+      const d = document.getElementById('desc').value;
+      const code = `<article class="post">
+  <img src="${i}" alt="${t}">
+  <h3>${t}</h3>
+  <p>${d}</p>
+</article>`;
+      document.getElementById('output').value = code;
+    }
+  </script>
+</body>
+</html>
