@@ -184,17 +184,21 @@ body {
 const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-supabase.from('posts').select().order('id', {ascending: false}).then(({data})=>{
+supabase.from('posts').select().order('id', {ascending: false}).then(({data, error})=>{
+  if(error){
+    console.log('فيه خطأ:', error)
+    return
+  }
+  
   document.getElementById('previewArea').innerHTML = data.map(p=>`
     <div class="card">
       <img src="${p.image_url}" />
       <h3>${p.title}</h3>
       <p>${p.description}</p>
     </div>
-  .join('')
+.join('')
 </script>
-<div id="posts"></div>
 </body>
 </html>
