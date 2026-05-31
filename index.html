@@ -31,42 +31,43 @@
   <h1>📝 مدونتي</h1>
   
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
-  <script>
-const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function loadPosts() {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .order('created_at', { ascending: false });
+  async function loadPosts() {
+    const { data, error } = await client
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  const container = document.getElementById('posts-container');
-  
-  if(error) {
-    container.innerHTML = 'خطأ في تحميل المقالات';
-    return;
+    const container = document.getElementById('posts-container');
+    
+    if(error) {
+      container.innerHTML = 'خطأ في تحميل المقالات';
+      console.log(error);
+      return;
+    }
+    
+    if(data.length === 0) {
+      container.innerHTML = 'لا توجد مقالات بعد';
+      return;
+    }
+    
+    container.innerHTML = data.map(post => `
+      <div class="post">
+        <h2>${post.title}</h2>
+        <p>${post.content}</p>
+        ${post.image_url ? `<img src="${post.image_url}" style="max-width:100%">` : ''}
+        <div class="date">${new Date(post.created_at).toLocaleDateString('ar-EG')}</div>
+      </div>
+    `).join('');
   }
-  
-  if(data.length === 0) {
-    container.innerHTML = 'لا توجد مقالات بعد';
-    return;
-  }
-  
-  container.innerHTML = data.map(post => `
-    <div style="border:1px solid #ddd; padding:15px; margin:10px 0; border-radius:8px;">
-      <h2>${post.title}</h2>
-      <p>${post.content}</p>
-      ${post.image_url ? `<img src="${post.image_url}" style="max-width:100%">` : ''}
-      <small>${new Date(post.created_at).toLocaleDateString('ar-EG')}</small>
-    </div>
-  `).join('');
-}
 
-loadPosts();
-</script>
+  loadPosts();
+          </script>
 </body>
 </html>
