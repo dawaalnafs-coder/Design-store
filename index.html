@@ -177,38 +177,50 @@ body {
   <p>اهلا وسهلا بكم</p> 
 </section>
 
-<div id="posts-container" style="padding:20px; border:2px solid blue;">جاري التحميل...</div>
+<div id="posts-container" style="padding:20px; border:2px solid blue; min-height:100px;">جاري التحميل...</div>
 
+<!-- سطر المكتبة لازم يكون قبل الكود -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-const supabase = window.supabase.createClient(
-  'https://pbadwhwdodhwutuzjwuz.supabase.co',
-  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
-)
+// نتأكد ان المكتبة حملت
+if(typeof supabase === 'undefined') {
+  document.getElementById('posts-container').innerHTML = 'خطأ: مكتبة Supabase ما حملت. تأكد من النت';
+} else {
+  const supabaseClient = supabase.createClient(
+    'https://pbadwhwdodhwutuzjwuz.supabase.co',
+    'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+  )
 
-async function loadPosts() {
-  const container = document.getElementById('posts-container')
-  
-  // نجرب نجيب كل شي بدون فلتر عشان نتأكد
-  const { data, error } = await supabase.from('posts').select('*')
-  
-  if (error) {
-    container.innerHTML = '<b style="color:red">خطأ Supabase: ' + error.message + '</b>'
-    return
+  async function loadPosts() {
+    const container = document.getElementById('posts-container')
+    
+    try {
+      container.innerHTML = 'جاري الاتصال بـ Supabase...'
+      
+      const { data, error } = await supabaseClient.from('posts').select('*')
+      
+      if (error) {
+        container.innerHTML = '<b style="color:red">خطأ: ' + error.message + '</b>'
+        return
+      }
+      
+      container.innerHTML = 'الصفوف اللي رجعت: ' + data.length + '<br><br>'
+      
+      if (data.length === 0) {
+        container.innerHTML += 'الجدول فاضي'
+        return
+      }
+      
+      container.innerHTML += '<pre style="font-size:10px">' + JSON.stringify(data, null, 2) + '</pre>'
+      
+    } catch (e) {
+      container.innerHTML = '<b style="color:red">خطأ في الكود: ' + e.message + '</b>'
+    }
   }
   
-  container.innerHTML = '<b>عدد الصفوف اللي رجعت: ' + data.length + '</b><br><br>'
-  
-  if (data.length === 0) {
-    container.innerHTML += 'الجدول فاضي تماماً'
-    return
-  }
-  
-  // نطبع البيانات الخام
-  container.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>'
+  loadPosts()
 }
-
-loadPosts()
 </script>
 </body>
 </html>
