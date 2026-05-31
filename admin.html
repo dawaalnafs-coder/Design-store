@@ -5,16 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة تحكم M&D</title>
 <style>
-body { font-family: 'Tajawal', sans-serif; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:30px; min-height:100vh }
+body { font-family: 'Tajawal', sans-serif; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:20px; min-height:100vh }
 .container { max-width:600px; margin:50px auto; background:white; padding:40px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.3) }
 h2 { text-align:center; color:#667eea; margin-bottom:30px }
 input, textarea { width:100%; padding:15px; margin:12px 0; border:2px solid #e0e0e0; border-radius:10px; font-size:16px; box-sizing:border-box }
-input:focus, textarea:focus { border-color:#667eea; outline:none }
 button { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; padding:18px; border-radius:10px; font-size:18px; font-weight:bold; cursor:pointer; width:100%; margin-top:20px }
 .msg { padding:15px; border-radius:10px; margin:15px 0; display:none; text-align:center; font-weight:bold }
-.success { background:#d4edda; color:#155724; border:1px solid #c3e6cb }
-.error { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb }
-label { display:flex; align-items:center; gap:10px; margin:15px 0; justify-content:center; font-size:16px }
+.success { background:#d4edda; color:#155724 }
+.error { background:#f8d7da; color:#721c24 }
+label { display:flex; align-items:center; gap:10px; margin:15px 0; justify-content:center }
 </style>
 </head>
 <body>
@@ -26,9 +25,7 @@ label { display:flex; align-items:center; gap:10px; margin:15px 0; justify-conte
   <textarea id="desc" rows="5" placeholder="وصف المنشور"></textarea>
   <input type="url" id="img" placeholder="رابط الصورة - اختياري">
   
-  <label>
-    <input type="checkbox" id="pub" checked> نشر مباشرة
-  </label>
+  <label><input type="checkbox" id="pub" checked> نشر مباشرة</label>
   
   <button type="button" onclick="addPost()">نشر المنشور</button>
   
@@ -37,43 +34,53 @@ label { display:flex; align-items:center; gap:10px; margin:15px 0; justify-conte
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-alert('1- الجافاسكربت بدأ يشتغل')
-
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
   'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
 )
 
-alert('2- اتصل بـ Supabase')
+function showMsg(text, type) {
+  const m = document.getElementById('msg')
+  m.className = 'msg ' + type
+  m.innerText = text
+  m.style.display = 'block'
+  setTimeout(() => m.style.display = 'none', 5000)
+}
 
-function addPost() {
-  alert('3- الزر اشتغل!')
-  
+async function addPost() {
   const pass = document.getElementById('pass').value
-  alert('4- كلمة السر: ' + pass)
-  
   if(pass !== 'md123') {
-    alert('5- كلمة السر غلط')
+    showMsg('❌ كلمة السر غلط! اكتب md123', 'error')
     return
   }
   
-  const title = document.getElementById('title').value
-  alert('6- العنوان: ' + title)
+  const title = document.getElementById('title').value.trim()
+  const desc = document.getElementById('desc').value.trim()
+  const img = document.getElementById('img').value.trim()
+  const pub = document.getElementById('pub').checked
   
-  alert('7- بجرب الحفظ الحين...')
+  if(!title || !desc) {
+    showMsg('⚠️ اكتب العنوان والوصف', 'error')
+    return
+  }
   
-  supabase.from('posts').insert([{
+  showMsg('⏳ جاري النشر...', 'success')
+  
+  const { error } = await supabase.from('posts').insert([{
     title: title,
-    description: document.getElementById('desc').value,
-    image_url: document.getElementById('img').value || null,
-    published: document.getElementById('pub').checked
-  }]).then(res => {
-    if(res.error) {
-      alert('8- خطأ Supabase: ' + res.error.message)
-    } else {
-      alert('8- نجح الحفظ! روح الموقع وسوي تحديث')
-    }
-  })
+    description: desc,
+    image_url: img || null,
+    published: pub
+  }])
+  
+  if(error) {
+    showMsg('❌ خطأ: ' + error.message, 'error')
+  } else {
+    showMsg('✅ تم النشر بنجاح! روح الموقع وسوي تحديث', 'success')
+    document.getElementById('title').value = ''
+    document.getElementById('desc').value = ''
+    document.getElementById('img').value = ''
+  }
 }
 </script>
 </body>
