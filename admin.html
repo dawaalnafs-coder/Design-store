@@ -1,40 +1,90 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>لوحة التحكم</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم M&D</title>
 <style>
-body{font-family:tahoma;background:#f5f5f5;padding:20px}
-input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:5px}
-button{background:#28a745;color:white;padding:12px;border:none;border-radius:5px;width:100%;font-size:16px}
-#msg{margin-top:10px;font-weight:bold;text-align:center}
+body { font-family: 'Tajawal', sans-serif; background:#f5f5f5; padding:30px; }
+.container { max-width:600px; margin:auto; background:white; padding:30px; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.1) }
+input, textarea { width:100%; padding:12px; margin:10px 0; border:2px solid #ddd; border-radius:8px; font-size:16px }
+button { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; padding:15px 30px; border-radius:8px; font-size:18px; cursor:pointer; width:100% }
+button:hover { opacity:0.9 }
+.msg { padding:15px; border-radius:8px; margin:15px 0; display:none }
+.success { background:#d4edda; color:#155724 }
+.error { background:#f8d7da; color:#721c24 }
 </style>
 </head>
 <body>
-<h2>إضافة منشور جديد</h2>
-<input id="title" placeholder="العنوان">
-<input id="image" placeholder="رابط الصورة">
-<textarea id="desc" placeholder="الوصف"></textarea>
-<div id="msg"></div>
-<button onclick="addPost()">حفظ في الموقع</button>
+<div class="container">
+  <h2 style="text-align:center; color:#667eea">لوحة تحكم M&D 👑</h2>
+  
+  <input type="password" id="pass" placeholder="كلمة السر" style="margin-bottom:20px">
+  
+  <input type="text" id="title" placeholder="عنوان المنشور">
+  <textarea id="desc" rows="5" placeholder="وصف المنشور"></textarea>
+  <input type="url" id="img" placeholder="رابط الصورة - اختياري">
+  
+  <label><input type="checkbox" id="pub" checked> نشر مباشرة</label>
+  
+  <button onclick="addPost()">نشر المنشور</button>
+  
+  <div id="msg" class="msg"></div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+const supabase = window.supabase.createClient(
+  'https://pbadwhwdodhwutuzjwuz.supabase.co',
+  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+)
 
-async function addPost(){
-  const title = document.getElementById('title').value
-  const image_url = document.getElementById('image').value
-  const description = document.getElementById('desc').value
-  const msg = document.getElementById('msg')
-  
-  if(!title || !image_url || !description){
-    msg.innerText = 'املأ كل الحقول'
-    msg.style.color = 'red'
+// كلمة سر بسيطة عشان محد يدخل غيرك
+const ADMIN_PASS = 'md123' 
+
+function showMsg(text, type) {
+  const m = document.getElementById('msg')
+  m.className = 'msg ' + type
+  m.innerText = text
+  m.style.display = 'block'
+  setTimeout(() => m.style.display = 'none', 3000)
+}
+
+async function addPost() {
+  const pass = document.getElementById('pass').value
+  if(pass !== ADMIN_PASS) {
+    showMsg('كلمة السر غلط!', 'error')
     return
+  }
+  
+  const title = document.getElementById('title').value
+  const desc = document.getElementById('desc').value
+  const img = document.getElementById('img').value
+  const pub = document.getElementById('pub').checked
+  
+  if(!title || !desc) {
+    showMsg('اكتب العنوان والوصف', 'error')
+    return
+  }
+  
+  const { error } = await supabase.from('posts').insert([{
+    title: title,
+    description: desc,
+    image_url: img,
+    published: pub
+  }])
+  
+  if(error) {
+    showMsg('خطأ: ' + error.message, 'error')
+  } else {
+    showMsg('تم النشر بنجاح! روح الموقع وشوفه', 'success')
+    document.getElementById('title').value = ''
+    document.getElementById('desc').value = ''
+    document.getElementById('img').value = ''
+  }
+}
+</script>
+</body>
+</html>    return
   }
   
   msg.innerText = 'جاري الحفظ...'
