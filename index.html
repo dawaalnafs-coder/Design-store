@@ -177,10 +177,9 @@ body {
   <p>اهلا وسهلا بكم</p> 
 </section>
 
-<div id="posts-container" style="padding:20px; max-width:600px; margin:auto;"></div>
+<div id="posts-container" style="padding:20px; border:2px solid blue;">جاري التحميل...</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
@@ -189,34 +188,26 @@ const supabase = window.supabase.createClient(
 
 async function loadPosts() {
   const container = document.getElementById('posts-container')
-  container.innerHTML = 'جاري تحميل المنشورات...'
   
-  const { data, error } = await supabase
-    .from('posts')
-    .select('title, description')
-    .eq('published', true)
-    .order('created_at', { ascending: false })
+  // نجرب نجيب كل شي بدون فلتر عشان نتأكد
+  const { data, error } = await supabase.from('posts').select('*')
   
   if (error) {
-    container.innerHTML = 'خطأ: ' + error.message
+    container.innerHTML = '<b style="color:red">خطأ Supabase: ' + error.message + '</b>'
     return
   }
   
-  if (!data || data.length === 0) {
-    container.innerHTML = 'مافي منشورات منشورة حالياً'
+  container.innerHTML = '<b>عدد الصفوف اللي رجعت: ' + data.length + '</b><br><br>'
+  
+  if (data.length === 0) {
+    container.innerHTML += 'الجدول فاضي تماماً'
     return
   }
   
-  container.innerHTML = ''
-  data.forEach(post => {
-    container.innerHTML += `
-      <div style="border:1px solid #ddd; border-radius:12px; padding:20px; margin:15px 0; background:white">
-        <h3 style="margin-top:0; color:#333">${post.title}</h3>
-        <p style="color:#666">${post.description}</p>
-      </div>
-    `
-  })
+  // نطبع البيانات الخام
+  container.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>'
 }
+
 loadPosts()
 </script>
 </body>
