@@ -2,61 +2,88 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>لوحة النشر</title>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة النشر - MetaAI</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:'Cairo',Tahoma,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:20px}
+.box{max-width:600px;margin:40px auto;background:#1e293b;padding:30px;border-radius:16px;border:1px solid #334155}
+h1{color:#38bdf8;text-align:center;margin-bottom:30px}
+label{display:block;margin-top:15px;margin-bottom:5px;font-weight:bold}
+input,textarea{width:100%;padding:12px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#e2e8f0;font-size:16px;box-sizing:border-box}
+textarea{min-height:120px;resize:vertical}
+button{width:100%;padding:14px;margin-top:20px;background:#38bdf8;color:#0f172a;border:none;border-radius:8px;font-size:18px;font-weight:bold;cursor:pointer}
+button:hover{background:#0ea5e9}
+#msg{margin-top:15px;padding:12px;border-radius:8px;text-align:center;font-weight:bold;display:none}
+.success{background:#166534;color:#4ade80}
+.error{background:#7f1d1d;color:#fca5a5}
+</style>
 </head>
-<body style="font-family:Tajawal; background:#f5f5f5; padding:40px; text-align:right;">
-<div style="max-width:600px; margin:auto; background:white; padding:30px; border-radius:15px;">
-<h2>✍️ انشر منشور جديد</h2>
+<body>
+<div class="box">
+<h1>📝 نشر منشور جديد</h1>
 
-<input type="text" id="title" placeholder="عنوان المنشور" style="width:100%; padding:12px; margin:10px 0;">
-<textarea id="desc" rows="5" placeholder="اكتب الوصف..." style="width:100%; padding:12px; margin:10px 0;"></textarea>
-<input type="text" id="img" placeholder="رابط الصورة - اختياري" style="width:100%; padding:12px; margin:10px 0;">
+<label>عنوان المنشور</label>
+<input type="text" id="title" placeholder="اكتب العنوان هنا">
 
-<button onclick="publish()" style="width:100%; padding:15px; background:#27ae60; color:white; border:none; border-radius:8px; font-size:18px;">نشر الآن</button>
-<p id="msg" style="text-align:center; margin-top:15px; font-weight:bold; min-height:25px;"></p>
-<br><a href="index.html">← الرجوع للمدونة</a>
+<label>وصف المنشور</label>
+<textarea id="description" placeholder="اكتب وصف المنشور هنا"></textarea>
+
+<label>رابط الصورة - اختياري</label>
+<input type="url" id="image_url" placeholder="https://...">
+
+<button onclick="publish()">نشر الآن</button>
+<div id="msg"></div>
 </div>
 
 <script>
-// حط بياناتك هنا
-const SUPABASE_URL = 'https://pbadhwwhodwutuzwjuz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'; // كمل المفتاح كامل
+// ضع مفاتيحك هنا
+const SUPABASE_URL = 'https://pbadwhodwutuwzjuzi.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const msg = document.getElementById('msg');
 
-async function publish() {
+async function publish(){
   const title = document.getElementById('title').value.trim();
-  const desc = document.getElementById('desc').value.trim();
-  const img = document.getElementById('img').value.trim();
-  const msg = document.getElementById('msg');
-
-  if (!title || !desc) {
-    msg.innerHTML = '⚠️ العنوان والوصف مطلوبين';
-    msg.style.color = 'red';
+  const description = document.getElementById('description').value.trim();
+  const image_url = document.getElementById('image_url').value.trim();
+  
+  msg.style.display = 'none';
+  
+  if(!title || !description){
+    showMsg('لازم تكتب عنوان ووصف', 'error');
     return;
   }
-
-  msg.innerHTML = '⏳ جاري النشر...';
-  msg.style.color = 'orange';
-
-  const { error } = await db.from('posts').insert({ 
-    title: title, 
-    content: desc, 
-    image_url: img 
-  });
-
-  if (error) {
-    msg.innerHTML = '❌ خطأ: ' + error.message;
-    msg.style.color = 'red';
-  } else {
-    msg.innerHTML = '✅ تم النشر بنجاح! <a href="index.html" style="color:green">شاهد المدونة</a>';
-    msg.style.color = 'green';
-    document.getElementById('title').value = '';
-    document.getElementById('desc').value = '';
-    document.getElementById('img').value = '';
+  
+  try{
+    const { error } = await db.from('posts').insert({
+      title: title,
+      description: description,
+      image_url: image_url || null,
+      published: true
+    });
+    
+    if(error){
+      showMsg('خطأ: ' + error.message, 'error');
+      console.error(error);
+    } else {
+      showMsg('✅ تم النشر بنجاح', 'success');
+      document.getElementById('title').value = '';
+      document.getElementById('description').value = '';
+      document.getElementById('image_url').value = '';
+    }
+  } catch(err){
+    showMsg('خطأ اتصال: تأكد من المفتاح والرابط', 'error');
+    console.error(err);
   }
+}
+
+function showMsg(text, type){
+  msg.textContent = text;
+  msg.className = type;
+  msg.style.display = 'block';
+  setTimeout(()=>msg.style.display='none', 4000);
 }
 </script>
 </body>
