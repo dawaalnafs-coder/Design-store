@@ -176,49 +176,40 @@ body {
   <h2>أحدث التصميمات الاحترافية</h2>
   <p>اهلا وسهلا بكم</p> 
 </section>
+<div id="posts-container" style="padding:30px; text-align:center; color:#999">جاري تحميل المنشورات...</div>
 
-<div id="posts-container" style="padding:20px; max-width:600px; margin:auto;"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
+console.log('الكود بدأ')
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
   'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
 )
 
-async function loadPosts() {
+supabase.from('posts').select('*').then(res => {
+  console.log('النتيجة:', res)
   const container = document.getElementById('posts-container')
-  container.innerHTML = 'جاري تحميل المنشورات...'
   
-  const { data, error } = await supabase
-    .from('posts')
-    .select('title, description, image_url')
-    .eq('published', true)
-    .order('created_at', { ascending: false })
-  
-  if (error) {
-    container.innerHTML = 'خطأ: ' + error.message
+  if(res.error) {
+    container.innerHTML = 'خطأ: ' + res.error.message
     return
   }
   
-  if (!data || data.length === 0) {
-    container.innerHTML = 'مافي منشورات منشورة حالياً'
+  if(!res.data || res.data.length == 0) {
+    container.innerHTML = 'مافي منشورات'
     return
   }
   
-  container.innerHTML = ''
-  data.forEach(post => {
-    container.innerHTML += `
-      <div style="border:1px solid #ddd; border-radius:15px; padding:20px; margin:20px 0; background:white; box-shadow:0 3px 10px rgba(0,0,0,0.1)">
-        ${post.image_url ? `<img src="${post.image_url}" style="width:100%; border-radius:10px; margin-bottom:15px;">` : ''}
-        <h3 style="margin:0 0 10px 0; color:#333">${post.title}</h3>
-        <p style="color:#666; line-height:1.6">${post.description}</p>
-      </div>
-    `
+  container.innerHTML = '<h3>المنشورات:</h3>'
+  res.data.forEach(p => {
+    if(p.published) {
+      container.innerHTML += `<div style="border:1px solid #ccc; padding:15px; margin:10px; border-radius:10px">
+        <h4>${p.title}</h4>
+        <p>${p.description}</p>
+      </div>`
+    }
   })
-}
-
-loadPosts()
+})
 </script>
 </body>
 </html>
