@@ -177,52 +177,44 @@ body {
   <p>اهلا وسهلا بكم</p> 
 </section>
 
-
-<div id="posts-container" style="border:3px solid red; padding:20px; min-height:100px; background:#fff0f0;">
-  جاري تحميل المنشورات...
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-try {
+const supabase = window.supabase.createClient(
+  'https://pbadwhwdodhwutuzjwuz.supabase.co',
+  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+)
+
+async function loadPosts() {
   const container = document.getElementById('posts-container')
-  container.innerHTML += '<br>خطوة 1: الـ div موجود ✅<br>'
   
-  const supabase = window.supabase.createClient(
-    'https://pbadwhwdodhwutuzjwuz.supabase.co',
-    'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
-  )
-  container.innerHTML += 'خطوة 2: اتصلنا Supabase ✅<br>'
+  const { data, error } = await supabase
+    .from('posts')
+    .select('title, description, image_url')
+    .eq('published', true)
+    .order('created_at', { ascending: false })
   
-  async function loadPosts() {
-    container.innerHTML += 'خطوة 3: بدينا نجلب البيانات...<br>'
-    
-    const { data, error } = await supabase.from('posts').select('*')
-    
-    container.innerHTML += 'خطوة 4: رجع الرد<br>'
-    
-    if (error) {
-      container.innerHTML += '<b style="color:red">خطأ Supabase: ' + error.message + '</b>'
-      return
-    }
-    
-    if (!data || data.length === 0) {
-      container.innerHTML += '<b style="color:orange">الجدول فاضي! ضيف صف من Supabase</b>'
-      return
-    }
-    
-    container.innerHTML = '<h3 style="color:green">نجح! المنشورات:</h3>'
-    data.forEach(p => {
-      container.innerHTML += `<p><b>${p.title || 'بدون عنوان'}</b> - ${p.description || ''}</p>`
-    })
+  if (error) {
+    container.innerHTML = 'خطأ: ' + error.message
+    return
   }
   
-  loadPosts()
+  if (!data || data.length === 0) {
+    container.innerHTML = 'لا توجد منشورات منشورة حالياً'
+    return
+  }
   
-} catch (e) {
-  document.getElementById('posts-container').innerHTML = 
-    '<b style="color:red; font-size:18px">خطأ في الكود: ' + e.message + '</b>'
+  container.innerHTML = ''
+  data.forEach(post => {
+    container.innerHTML += `
+      <div style="border:1px solid #ddd; border-radius:10px; padding:15px; margin:15px 0; box-shadow:0 2px 5px rgba(0,0,0,0.1)">
+        <h3>${post.title}</h3>
+        <p>${post.description}</p>
+      </div>
+    `
+  })
 }
+
+loadPosts()
 </script>
 </body>
 </html>
