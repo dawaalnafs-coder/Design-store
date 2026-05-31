@@ -47,44 +47,45 @@ function showMsg(text, type) {
   m.className = 'msg ' + type
   m.innerText = text
   m.style.display = 'block'
-  setTimeout(() => m.style.display = 'none', 5000)
 }
 
 async function addPost() {
   const pass = document.getElementById('pass').value
-  if(pass !== 'md123') {
+  if(pass!== 'md123') {
     showMsg('❌ كلمة السر غلط! اكتب md123', 'error')
     return
   }
-  
+
   const title = document.getElementById('title').value.trim()
   const desc = document.getElementById('desc').value.trim()
   const img = document.getElementById('img').value.trim()
   const pub = document.getElementById('pub').checked
-  
-  if(!title || !desc) {
+
+  if(!title ||!desc) {
     showMsg('⚠️ اكتب العنوان والوصف', 'error')
     return
   }
-  
-  showMsg('⏳ جاري النشر...', 'success')
-  
-  const { error } = await supabase.from('posts').insert([{
-    title: title,
-    description: desc,
-    image_url: img || null,
-    published: pub,
-    created_at: new Date().toISOString()
-  }])
-  
-  if(error) {
-    showMsg('❌ خطأ: ' + error.message, 'error')
-    console.log(error)
-  } else {
-    showMsg('✅ تم النشر بنجاح! روح الموقع وسوي تحديث', 'success')
-    document.getElementById('title').value = ''
-    document.getElementById('desc').value = ''
-    document.getElementById('img').value = ''
+
+  showMsg('⏳ جاري النشر... انتظر', 'success')
+
+  try {
+    const { data, error } = await supabase.from('posts').insert([{
+      title: title,
+      description: desc,
+      image_url: img || null,
+      published: pub
+    }]).select()
+
+    if(error) {
+      showMsg('❌ خطأ من Supabase: ' + error.message, 'error')
+    } else {
+      showMsg('✅ نجح! انضاف: ' + data[0].title, 'success')
+      document.getElementById('title').value = ''
+      document.getElementById('desc').value = ''
+      document.getElementById('img').value = ''
+    }
+  } catch(e) {
+    showMsg('❌ خطأ عام: ' + e.message, 'error')
   }
 }
 </script>
