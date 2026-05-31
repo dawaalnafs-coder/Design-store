@@ -1,70 +1,49 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة تحكم M&D</title>
-<style>
-body { font-family: 'Tajawal', sans-serif; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:20px; min-height:100vh }
-.container { max-width:600px; margin:50px auto; background:white; padding:40px; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.3) }
-h2 { text-align:center; color:#667eea; margin-bottom:30px }
-input, textarea { width:100%; padding:15px; margin:12px 0; border:2px solid #e0e0e0; border-radius:10px; font-size:16px; box-sizing:border-box }
-button { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border:none; padding:18px; border-radius:10px; font-size:18px; font-weight:bold; cursor:pointer; width:100%; margin-top:20px }
-.msg { padding:15px; border-radius:10px; margin:15px 0; display:none; text-align:center; font-weight:bold }
-.success { background:#d4edda; color:#155724 }
-.error { background:#f8d7da; color:#721c24 }
-label { display:flex; align-items:center; gap:10px; margin:15px 0; justify-content:center }
-</style>
-</head>
-<body>
-<div class="container">
-  <h2>👑 لوحة تحكم M&D</h2>
-  
-  <input type="password" id="pass" placeholder="كلمة السر: md123">
-  <input type="text" id="title" placeholder="عنوان المنشور">
-  <textarea id="desc" rows="5" placeholder="وصف المنشور"></textarea>
-  <input type="url" id="img" placeholder="رابط الصورة - اختياري">
-  
-  <label><input type="checkbox" id="pub" checked> نشر مباشرة</label>
-  
-  <button type="button" onclick="addPost()">نشر المنشور</button>
-  
-  <div id="msg" class="msg"></div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<head><meta charset="UTF-8"><title>نشر</title></head>
+<body style="padding:20px;font-family:tahoma">
+<h3>نشر منشور جديد</h3>
+<input type="password" id="p" placeholder="كلمة السر: md123" style="width:100%;padding:10px"><br><br>
+<input type="text" id="t" placeholder="العنوان" style="width:100%;padding:10px"><br><br>
+<textarea id="d" placeholder="الوصف" style="width:100%;padding:10px;height:100px"></textarea><br><br>
+<button onclick="go()" style="width:100%;padding:15px;background:green;color:white">نشر الآن</button>
+<p id="msg"></p>
+
 <script>
-alert('1- بدأ التحميل')
+const URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
 
-const supabase = window.supabase.createClient(
-  'https://pbadwhwdodhwutuzjwuz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
-)
-
-alert('2- اتصل Supabase')
-
-async function addPost() {
-  alert('3- الزر اشتغل')
-
-  const pass = document.getElementById('pass').value
-  if(pass!== 'md123') { alert('4- كلمة سر غلط'); return }
-
-  const obj = {
-    title: document.getElementById('title').value,
-    description: document.getElementById('desc').value,
-    image_url: document.getElementById('img').value || null,
-    published: document.getElementById('pub').checked
+async function go(){
+  if(document.getElementById('p').value!= 'md123'){
+    document.getElementById('msg').innerText = '❌ كلمة السر غلط'
+    return
   }
 
-  alert('4- البيانات: ' + JSON.stringify(obj))
+  document.getElementById('msg').innerText = 'جاري النشر...'
 
-  const res = await supabase.from('posts').insert([obj]).select()
+  const res = await fetch(URL + '/rest/v1/posts', {
+    method: 'POST',
+    headers: {
+      'apikey': KEY,
+      'Authorization': 'Bearer ' + KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({
+      title: document.getElementById('t').value,
+      description: document.getElementById('d').value,
+      published: true
+    })
+  })
 
-  alert('5- النتيجة: ' + JSON.stringify(res))
+  const data = await res.json()
 
-  if(res.error) {
-    alert('❌ خطأ: ' + res.error.message + '\nCode: ' + res.error.code)
+  if(res.ok){
+    document.getElementById('msg').innerText = '✅ تم النشر بنجاح! ID: ' + data[0].id
+    document.getElementById('t').value = ''
+    document.getElementById('d').value = ''
   } else {
-    alert('✅ نجح! ID: ' + res.data[0].id)
+    document.getElementById('msg').innerText = '❌ خطأ: ' + JSON.stringify(data)
   }
 }
 </script>
