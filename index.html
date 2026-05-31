@@ -183,13 +183,41 @@ body {
 <script>
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
-  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w')
+  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+)
 
-const { data, error } = await supabase
-  .from('posts')
-  .select('title, description, image_url')
-  .eq('published', true)
-  .order('created_at', { ascending: false })
+async function loadPosts() {
+  const container = document.getElementById('posts-container')
+  container.innerHTML = 'جاري تحميل المنشورات...'
+  
+  const { data, error } = await supabase
+    .from('posts')
+    .select('title, description, image_url')
+  
+  if (error) {
+    container.innerHTML = 'خطأ: ' + error.message
+    return
+  }
+  
+  if (!data || data.length === 0) {
+    container.innerHTML = 'الجدول فاضي، ضيف منشور من Supabase'
+    return
+  }
+  
+  container.innerHTML = ''
+  data.forEach(post => {
+    container.innerHTML += `
+      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <h3>${post.title}</h3>
+        <p>${post.description}</p>
+      </div>
+    `
+  })
+}
+
+loadPosts()
 </script>
+
+<div id="posts-container"></div>
 </body>
 </html>
