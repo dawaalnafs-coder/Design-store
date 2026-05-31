@@ -37,56 +37,43 @@ label { display:flex; align-items:center; gap:10px; margin:15px 0; justify-conte
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+alert('1- الجافاسكربت بدأ يشتغل')
+
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
   'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
 )
 
-function showMsg(text, type) {
-  const m = document.getElementById('msg')
-  m.className = 'msg ' + type
-  m.innerText = text
-  m.style.display = 'block'
-}
+alert('2- اتصل بـ Supabase')
 
-async function addPost() {
+function addPost() {
+  alert('3- الزر اشتغل!')
+  
   const pass = document.getElementById('pass').value
-  if(pass!== 'md123') {
-    showMsg('❌ كلمة السر غلط! اكتب md123', 'error')
+  alert('4- كلمة السر: ' + pass)
+  
+  if(pass !== 'md123') {
+    alert('5- كلمة السر غلط')
     return
   }
-
-  const title = document.getElementById('title').value.trim()
-  const desc = document.getElementById('desc').value.trim()
-  const img = document.getElementById('img').value.trim()
-  const pub = document.getElementById('pub').checked
-
-  if(!title ||!desc) {
-    showMsg('⚠️ اكتب العنوان والوصف', 'error')
-    return
-  }
-
-  showMsg('⏳ جاري النشر... انتظر', 'success')
-
-  try {
-    const { data, error } = await supabase.from('posts').insert([{
-      title: title,
-      description: desc,
-      image_url: img || null,
-      published: pub
-    }]).select()
-
-    if(error) {
-      showMsg('❌ خطأ من Supabase: ' + error.message, 'error')
+  
+  const title = document.getElementById('title').value
+  alert('6- العنوان: ' + title)
+  
+  alert('7- بجرب الحفظ الحين...')
+  
+  supabase.from('posts').insert([{
+    title: title,
+    description: document.getElementById('desc').value,
+    image_url: document.getElementById('img').value || null,
+    published: document.getElementById('pub').checked
+  }]).then(res => {
+    if(res.error) {
+      alert('8- خطأ Supabase: ' + res.error.message)
     } else {
-      showMsg('✅ نجح! انضاف: ' + data[0].title, 'success')
-      document.getElementById('title').value = ''
-      document.getElementById('desc').value = ''
-      document.getElementById('img').value = ''
+      alert('8- نجح الحفظ! روح الموقع وسوي تحديث')
     }
-  } catch(e) {
-    showMsg('❌ خطأ عام: ' + e.message, 'error')
-  }
+  })
 }
 </script>
 </body>
