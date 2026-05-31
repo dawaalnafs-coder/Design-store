@@ -38,47 +38,33 @@ const supabase = window.supabase.createClient(
   'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
 )
 
-function showMsg(text, type) {
-  const m = document.getElementById('msg')
-  m.className = 'msg ' + type
-  m.innerText = text
-  m.style.display = 'block'
-  setTimeout(() => m.style.display = 'none', 4000)
-}
-
 async function addPost() {
   const pass = document.getElementById('pass').value
+  alert('1- كلمة السر: ' + pass)
+  
   if(pass !== 'md123') {
-    showMsg('كلمة السر غلط! اكتب md123', 'error')
+    alert('كلمة السر غلط!')
     return
   }
   
   const title = document.getElementById('title').value
   const desc = document.getElementById('desc').value
-  const img = document.getElementById('img').value
-  const pub = document.getElementById('pub').checked
+  alert('2- العنوان: ' + title)
+  alert('3- الوصف: ' + desc)
   
-  if(!title || !desc) {
-    showMsg('اكتب العنوان والوصف', 'error')
-    return
-  }
+  alert('4- بجرب أحفظ الحين...')
   
-  showMsg('جاري النشر...', 'success')
-  
-  const { error } = await supabase.from('posts').insert([{
+  const { data, error } = await supabase.from('posts').insert([{
     title: title,
     description: desc,
-    image_url: img,
-    published: pub
+    image_url: document.getElementById('img').value,
+    published: document.getElementById('pub').checked
   }])
   
   if(error) {
-    showMsg('خطأ: ' + error.message, 'error')
+    alert('خطأ Supabase: ' + error.message)
   } else {
-    showMsg('تم النشر بنجاح! ✅ روح الموقع وشوفه', 'success')
-    document.getElementById('title').value = ''
-    document.getElementById('desc').value = ''
-    document.getElementById('img').value = ''
+    alert('نجح! البيانات: ' + JSON.stringify(data))
   }
 }
 </script>
