@@ -178,47 +178,51 @@ body {
 </section>
 
 
-<div id="posts-container" style="border:2px dashed red; padding:20px; min-height:80px;">
+<div id="posts-container" style="border:3px solid red; padding:20px; min-height:100px; background:#fff0f0;">
   جاري تحميل المنشورات...
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const supabase = window.supabase.createClient(
-  'https://pbadwhwdodhwutuzjwuz.supabase.co',
-  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
-)
-
-async function loadPosts() {
+try {
   const container = document.getElementById('posts-container')
+  container.innerHTML += '<br>خطوة 1: الـ div موجود ✅<br>'
   
-  try {
-    container.innerHTML = '1. بدينا...<br>'
+  const supabase = window.supabase.createClient(
+    'https://pbadwhwdodhwutuzjwuz.supabase.co',
+    'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+  )
+  container.innerHTML += 'خطوة 2: اتصلنا Supabase ✅<br>'
+  
+  async function loadPosts() {
+    container.innerHTML += 'خطوة 3: بدينا نجلب البيانات...<br>'
     
-    const result = await supabase.from('posts').select('*')
-    container.innerHTML += '2. وصلنا Supabase<br>'
+    const { data, error } = await supabase.from('posts').select('*')
     
-    if (result.error) {
-      container.innerHTML += 'خطأ: ' + result.error.message
+    container.innerHTML += 'خطوة 4: رجع الرد<br>'
+    
+    if (error) {
+      container.innerHTML += '<b style="color:red">خطأ Supabase: ' + error.message + '</b>'
       return
     }
     
-    if (!result.data || result.data.length === 0) {
-      container.innerHTML += '3. الجدول فاضي - ضيف صف من Supabase'
+    if (!data || data.length === 0) {
+      container.innerHTML += '<b style="color:orange">الجدول فاضي! ضيف صف من Supabase</b>'
       return
     }
     
-    container.innerHTML = 'نجح! المنشورات:<br>'
-    result.data.forEach(p => {
-      container.innerHTML += `<b>${p.title}</b><br>`
+    container.innerHTML = '<h3 style="color:green">نجح! المنشورات:</h3>'
+    data.forEach(p => {
+      container.innerHTML += `<p><b>${p.title || 'بدون عنوان'}</b> - ${p.description || ''}</p>`
     })
-    
-  } catch (e) {
-    container.innerHTML = 'خطأ في الكود: ' + e.message
   }
+  
+  loadPosts()
+  
+} catch (e) {
+  document.getElementById('posts-container').innerHTML = 
+    '<b style="color:red; font-size:18px">خطأ في الكود: ' + e.message + '</b>'
 }
-
-loadPosts()
 </script>
 </body>
 </html>
