@@ -1,215 +1,71 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css">
-  <title>مدونة التصميمات</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f5f5f5;
-    
-    .hero {
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      color: white;
-      padding: 60px 20px;
-      text-align: center;
-    }
-
-/* === ستايل الكروت === */
-.posts {
-  display: grid;
-  grid-template-columns: 1fr; /* موبايل: كرت واحد تحت الثاني */
-  gap: 20px; /* المسافة بين الكروت */
-  padding: 30px 20px;
-  max-width: 1000px;
-  margin: auto;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: 0.3s;
-}
-
-.card:hover {
-  transform: translateY(-5px); /* الكرت يطلع لفوق شوي لما تمرر الماوس */
-}
-
-.card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover; /* الصورة تقص نفسها عشان تطلع مرتبة */
-  display: block;
-}
-
-.card h3 {
-  padding: 15px;
-  font-size: 18px;
-  color: #1a1a2e;
-}
-
-.card p {
-  padding: 0 15px 15px;
-  font-size: 14px;
-  color: #555;
-}
-/* === للكمبيوتر: كرتين جنب بعض === */
-@media (min-width: 768px) {
-  .posts {
-    margin: 20px auto; /* 20px فوق وتحت */
-    padding: 0 15px; /* يمين يسار عشان ما يلزق بالحواف */
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px; /* فراغ أكبر للكمبيوتر */
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدونتي</title>
+<style>
+  body { font-family: 'Tahoma', sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+  .container { max-width: 700px; margin: auto; }
+  h1 { text-align: center; color: #333; }
+  .post { 
+    background: white; 
+    padding: 20px; 
+    margin: 15px 0; 
+    border-radius: 12px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
   }
-} /* هنا يقفل @media */
-
-/* === اللوجو === */
-.logo img {
-  max-height: 60px;
-  width: auto; /* انتبه فاصلة منقوطة مو نقطتين */
-  display: block;
-  margin: 30px auto; /* يتوسط + فراغ فوق وتحت */
-}
-
-/* === البنر بالنص === */
-.banner {
-  max-width: 600px;
-  margin: 20px auto;
-  text-align: center;
-}
-/* حاوية الكروت */
-
- /* === المنيو تحت الصفحة === */
-.navbar {
-  background: #1a1a2e;
-  padding: 12px;
-  text-align: center;
-  position: fixed; /* يثبته */
-  bottom: 0; /* ينزله تحت */
-  left: 0;
-  width: 100%;
-  z-index: 999; /* عشان يطلع فوق الكروت */
-}
-
-.navbar a {
-  color: white;
-  margin: 0 12px;
-  text-decoration: none;
-  font-size: 16px;
-}
-
-.navbar a:hover {
-  color: #7f5af0;
-}
-
-/* عشان المحتوى ما يختفي تحت المنيو */
-body {
-  padding-bottom: 60px; /* نفس ارتفاع المنيو تقريبا */
-}
-}
-.upload-box {
-  margin: 20px auto;
-  padding: 20px;
-  border: 2px dashed #2575fc;
-  border-radius: 15px;
-  text-align: center;
-  background: #f7f9ff;
-  max-width: 500px;
-}
-.upload-box input[type="file"] {
-  margin: 10px 5px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-.upload-box input[type="number"] {
-  margin: 10px 5px;
-  padding: 8px;
-  width: 120px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-.upload-box button {
-  background: #2575fc;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.upload-box button:hover {
-  background: #1e5fd9;
-}
-
-.previewArea {
-  gap: 15px;
-  margin-top: 20px;
-  justify-content: center;
-  }
-    
-    .btn:hover {
-      background: #1a5edb;
-    }
-  </style>
+  .post:hover { transform: translateY(-3px); }
+  .post h2 { margin-top: 0; color: #2c3e50; }
+  .post p { color: #555; line-height: 1.8; }
+  .date { font-size: 12px; color: #999; margin-top: 10px; }
+  .loading { text-align: center; padding: 40px; color: #666; }
+</style>
 </head>
 <body>
-<nav class="navbar">
-  <a href="index.html">الرئيسية</a>
-  <a href="blog.html">المدونة</a>
-  <a href="about.html">من نحن</a>
-  <a href="contact.html">اتصل بنا</a>
-</nav>
-<header>
-  <a href="index.html">
-  <img src="logo.png" alt="M&D Design & Post">
-  </a>
-</header>
+<div class="container">
+  <h1>📝 مدونتي</h1>
+  <div id="posts" class="loading">جاري تحميل المنشورات...</div>
+</div>
 
-<section class="hero">
-  <h2>أحدث التصميمات الاحترافية</h2>
-  <p>اهلا وسهلا بكم</p> 
-</section>
-<div id="posts-container" style="padding:30px; text-align:center; color:#999">جاري تحميل المنشورات...</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-console.log('الكود بدأ')
-const supabase = window.supabase.createClient(
-  'https://pbadwhwdodhwutuzjwuz.supabase.co',
-  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
-)
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_gHL7g2NhmwdOV7bm7iK9eA_yM5LCqfc';
 
-supabase.from('posts').select('*').then(res => {
-  console.log('النتيجة:', res)
-  const container = document.getElementById('posts-container')
-  
-  if(res.error) {
-    container.innerHTML = 'خطأ: ' + res.error.message
-    return
-  }
-  
-  if(!res.data || res.data.length == 0) {
-    container.innerHTML = 'مافي منشورات'
-    return
-  }
-  
-  container.innerHTML = '<h3>المنشورات:</h3>'
-  res.data.forEach(p => {
-    if(p.published) {
-      container.innerHTML += `<div style="border:1px solid #ccc; padding:15px; margin:10px; border-radius:10px">
-        <h4>${p.title}</h4>
-        <p>${p.description}</p>
-      </div>`
+async function loadPosts() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/posts?published=eq.true&order=created_at.desc`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      }
+    });
+    
+    const posts = await res.json();
+    const container = document.getElementById('posts');
+    
+    if(posts.length === 0) {
+      container.innerHTML = '<div class="loading">لا توجد منشورات بعد. انشر أول منشور من لوحة التحكم</div>';
+      return;
     }
-  })
-})
+    
+    container.innerHTML = posts.map(p => `
+      <div class="post">
+        <h2>${p.title}</h2>
+        <p>${p.description}</p>
+        ${p.image_url ? `<img src="${p.image_url}" style="max-width:100%; border-radius:8px; margin-top:10px">` : ''}
+        <div class="date">نُشر في: ${new Date(p.created_at).toLocaleDateString('ar-SA')}</div>
+      </div>
+    `).join('');
+    
+  } catch(e) {
+    document.getElementById('posts').innerHTML = '❌ خطأ في تحميل المنشورات';
+    console.error(e);
+  }
+}
+
+loadPosts();
 </script>
 </body>
 </html>
