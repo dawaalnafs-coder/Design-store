@@ -35,55 +35,23 @@ button:hover { opacity:0.9 }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+alert('الكود اشتغل!') // لو طلعت لك هذي معناها الكود شغال
+
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
   'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
 )
 
-const ADMIN_PASS = 'md123'
-
-function showMsg(text, type) {
-  const m = document.getElementById('msg')
-  m.className = 'msg ' + type
-  m.innerText = text
-  m.style.display = 'block'
-  setTimeout(() => m.style.display = 'none', 3000)
-}
-
-async function addPost() {
+function addPost() {
+  alert('الزر انكبس!') // لو طلعت هذي معناها الزر شغال
   const pass = document.getElementById('pass').value
-  if(pass !== ADMIN_PASS) {
-    showMsg('كلمة السر غلط!', 'error')
+  alert('كلمة السر: ' + pass) // شوف ايش قاري
+  
+  if(pass !== 'md123') {
+    alert('كلمة السر غلط! اكتب md123')
     return
   }
-  
-  const title = document.getElementById('title').value
-  const desc = document.getElementById('desc').value
-  const img = document.getElementById('img').value
-  const pub = document.getElementById('pub').checked
-  
-  if(!title || !desc) {
-    showMsg('اكتب العنوان والوصف', 'error')
-    return
-  }
-  
-  showMsg('جاري الحفظ...', 'success')
-  
-  const { error } = await supabase.from('posts').insert([{
-    title: title,
-    description: desc,
-    image_url: img,
-    published: pub
-  }])
-  
-  if(error) {
-    showMsg('خطأ: ' + error.message, 'error')
-  } else {
-    showMsg('تم النشر بنجاح! ✅', 'success')
-    document.getElementById('title').value = ''
-    document.getElementById('desc').value = ''
-    document.getElementById('img').value = ''
-  }
+  alert('كل شي تمام، بنحفظ الحين...')
 }
 </script>
 </body>
