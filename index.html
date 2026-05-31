@@ -206,14 +206,14 @@ supabase.from('posts').select().order('id', {ascending: false}).then(({data, err
     return
   }
   
-  debug.style.display = 'none'
+  debug.style.display = 'block'
   previewArea.innerHTML = data.map(p=>`
     <div class="card">
       <img src="${p.image_url || 'https://picsum.photos/400/300'}" onerror="this.src='https://picsum.photos/400/300'"/>
       <h3>${p.title}</h3>
       <p>${p.description}</p>
     </div>
-  `).join('')
+  }`).join('')
 </script>
 </body>
 </html>
