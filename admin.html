@@ -31,55 +31,40 @@ label { display:flex; align-items:center; gap:10px; margin:15px 0; justify-conte
   
   <div id="msg" class="msg"></div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+alert('1- بدأ التحميل')
+
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
-  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
 )
 
-function showMsg(text, type) {
-  const m = document.getElementById('msg')
-  m.className = 'msg ' + type
-  m.innerText = text
-  m.style.display = 'block'
-  setTimeout(() => m.style.display = 'none', 5000)
-}
+alert('2- اتصل Supabase')
 
 async function addPost() {
+  alert('3- الزر اشتغل')
+
   const pass = document.getElementById('pass').value
-  if(pass !== 'md123') {
-    showMsg('❌ كلمة السر غلط! اكتب md123', 'error')
-    return
+  if(pass!== 'md123') { alert('4- كلمة سر غلط'); return }
+
+  const obj = {
+    title: document.getElementById('title').value,
+    description: document.getElementById('desc').value,
+    image_url: document.getElementById('img').value || null,
+    published: document.getElementById('pub').checked
   }
-  
-  const title = document.getElementById('title').value.trim()
-  const desc = document.getElementById('desc').value.trim()
-  const img = document.getElementById('img').value.trim()
-  const pub = document.getElementById('pub').checked
-  
-  if(!title || !desc) {
-    showMsg('⚠️ اكتب العنوان والوصف', 'error')
-    return
-  }
-  
-  showMsg('⏳ جاري النشر...', 'success')
-  
-  const { error } = await supabase.from('posts').insert([{
-    title: title,
-    description: desc,
-    image_url: img || null,
-    published: pub
-  }])
-  
-  if(error) {
-    showMsg('❌ خطأ: ' + error.message, 'error')
+
+  alert('4- البيانات: ' + JSON.stringify(obj))
+
+  const res = await supabase.from('posts').insert([obj]).select()
+
+  alert('5- النتيجة: ' + JSON.stringify(res))
+
+  if(res.error) {
+    alert('❌ خطأ: ' + res.error.message + '\nCode: ' + res.error.code)
   } else {
-    showMsg('✅ تم النشر بنجاح! روح الموقع وسوي تحديث', 'success')
-    document.getElementById('title').value = ''
-    document.getElementById('desc').value = ''
-    document.getElementById('img').value = ''
+    alert('✅ نجح! ID: ' + res.data[0].id)
   }
 }
 </script>
