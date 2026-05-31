@@ -177,19 +177,19 @@ body {
   <p>اهلا وسهلا بكم</p> 
 </section>
 
-  <div id="debug"></div>
+
 <div id="previewArea">جاري تحميل المنشورات...</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const debug = document.getElementById('debug')
-debug.style.display = 'block'
+const supabase = window.supabase.createClient(
+  'https://pbadwhwdodhwutuzjwuz.supabase.co',
+  'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w')
 
-if(typeof window.supabase === 'undefined'){
-  debug.innerText = '❌ مكتبة Supabase ما تحملت - شوف سطر الـ script'
-} else {
-  debug.innerText = '✅ المكتبة شغالة، المشكلة من الـ URL أو الـ KEY'
-}
+const { data, error } = await supabase
+  .from('posts')
+  .select('title, description, image_url')
+  .eq('published', true)
+  .order('created_at', { ascending: false })
 </script>
 </body>
 </html>
