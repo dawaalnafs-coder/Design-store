@@ -178,46 +178,54 @@ body {
 </section>
 
 
-<div id="previewArea">جاري تحميل المنشورات...</div>
+<div id="posts-container" style="min-height:100px; border:2px dashed red; padding:20px;">
+  جاري تحميل المنشورات...
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+console.log('الكود بدأ يشتغل ✅')
+
 const supabase = window.supabase.createClient(
   'https://pbadwhwdodhwutuzjwuz.supabase.co',
   'sb_publishable_MRspQIqKOrUDJF_HxKHnoQ_J3Sfvz1w'
 )
 
 async function loadPosts() {
+  console.log('ندخل على loadPosts')
   const container = document.getElementById('posts-container')
-  container.innerHTML = 'جاري تحميل المنشورات...'
   
-  const { data, error } = await supabase
-    .from('posts')
-    .select('title, description, image_url')
-  
-  if (error) {
-    container.innerHTML = 'خطأ: ' + error.message
+  if (!container) {
+    alert('خطأ: ما لقيت div حق posts-container')
     return
   }
   
-  if (!data || data.length === 0) {
-    container.innerHTML = 'الجدول فاضي، ضيف منشور من Supabase'
-    return
+  try {
+    const { data, error } = await supabase.from('posts').select('*')
+    console.log('النتيجة:', data, error)
+    
+    if (error) {
+      container.innerHTML = 'خطأ من Supabase: ' + error.message
+      return
+    }
+    
+    if (!data || data.length === 0) {
+      container.innerHTML = 'الجدول فاضي. روح Supabase وضيف صف تجريبي'
+      return
+    }
+    
+    container.innerHTML = '<h3>نجح! المنشورات:</h3>'
+    data.forEach(post => {
+      container.innerHTML += `<p><b>${post.title}</b> - ${post.description}</p>`
+    })
+    
+  } catch (e) {
+    container.innerHTML = 'خطأ في الكود: ' + e.message
   }
-  
-  container.innerHTML = ''
-  data.forEach(post => {
-    container.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <h3>${post.title}</h3>
-        <p>${post.description}</p>
-      </div>
-    `
-  })
 }
 
 loadPosts()
 </script>
-
 <div id="posts-container"></div>
 </body>
 </html>
