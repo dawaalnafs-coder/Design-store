@@ -180,40 +180,16 @@ body {
   <div id="debug"></div>
 <div id="previewArea">جاري تحميل المنشورات...</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 const debug = document.getElementById('debug')
 debug.style.display = 'block'
-debug.innerText = 'الكود بدأ يشتغل'
-const previewArea = document.getElementById('previewArea')
 
-supabase.from('posts').select().order('id', {ascending: false}).then(({data, error})=>{
-  
-  if(error){
-    debug.style.display = 'block'
-    debug.innerText = '❌ فيه خطأ: ' + error.message
-    previewArea.innerHTML = ''
-    return
-  }
-  
-  if(!data || data.length == 0){
-    debug.style.display = 'block'
-    debug.innerText = '⚠️ ما فيه منشورات في قاعدة البيانات'
-    previewArea.innerHTML = ''
-    return
-  }
-  
-  debug.style.display = 'block'
-  previewArea.innerHTML = data.map(p=>`
-    <div class="card">
-      <img src="${p.image_url || 'https://picsum.photos/400/300'}" onerror="this.src='https://picsum.photos/400/300'"/>
-      <h3>${p.title}</h3>
-      <p>${p.description}</p>
-    </div>
-  }`).join('')
+if(typeof window.supabase === 'undefined'){
+  debug.innerText = '❌ مكتبة Supabase ما تحملت - شوف سطر الـ script'
+} else {
+  debug.innerText = '✅ المكتبة شغالة، المشكلة من الـ URL أو الـ KEY'
+}
 </script>
 </body>
 </html>
