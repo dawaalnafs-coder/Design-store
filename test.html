@@ -6,10 +6,9 @@
 </head>
 <body style="background:#111;color:#0f0;font-family:tahoma;padding:20px">
 <h3>النتيجة:</h3>
-<pre id="r">بختبر...</pre>
+<pre id="r">بختبر الاتصال...</pre>
 
 <script>
-// Supabase مدمج - نسخة مصغرة للاختبار فقط
 async function testSupabase() {
   const url = 'https://pbadwhdodhwutuzjwuz.supabase.co/rest/v1/posts?select=id,title&limit=1'
   const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
@@ -25,9 +24,9 @@ async function testSupabase() {
     const data = await res.json()
     
     if(res.ok) {
-      document.getElementById('r').textContent = '✅ الاتصال ناجح!\n' + JSON.stringify(data, null, 2)
+      document.getElementById('r').textContent = '✅ الاتصال ناجح 100%!\n' + JSON.stringify(data, null, 2)
     } else {
-      document.getElementById('r').textContent = '❌ خطأ: ' + data.message
+      document.getElementById('r').textContent = '❌ خطأ: ' + JSON.stringify(data)
     }
   } catch(e) {
     document.getElementById('r').textContent = '❌ خطأ شبكة: ' + e.message
