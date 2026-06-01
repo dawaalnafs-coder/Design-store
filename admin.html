@@ -67,8 +67,8 @@ async function loadPosts(){
 const {data, error} = await supabaseClient.from('posts').select('*').order('id', {ascending: false})
 
 if(error){
-postsList.innerHTML = 'خطأ في التحميل: ' + error.message
-showMsg('خطأ في الاتصال', 'error')
+postsList.innerHTML = 'الخطأ هو: ' + error.message + ' - الكود: ' + error.code
+showMsg('فيه مشكلة', 'error')
 return
 }
 
