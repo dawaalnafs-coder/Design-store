@@ -54,12 +54,14 @@ const msg = document.getElementById('msg')
 const postsList = document.getElementById('postsList')
 
 // 4. رسائل التنبيه
+// 4. رسائل التنبيه
 function showMsg(text, type){
-msg.style.display = 'block'
-msg.innerText = text
-msg.style.background = type=='error'? '#f8d7da' : '#d4edda'
-msg.style.color = type=='error'? '#721c24' : '#155724'
-setTimeout()=>{msg.style.display='none'}, 3000}
+  msg.style.display = 'block'
+  msg.innerText = text
+  msg.style.background = type=='error'? '#f8d7da' : '#d4edda'
+  msg.style.color = type=='error'? '#721c24' : '#155724'
+  setTimeout(()=>{msg.style.display='none'}, 3000)
+}
 }
  
  async function loadPosts(){
