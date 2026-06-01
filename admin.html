@@ -63,7 +63,8 @@ function showMsg(text, type){
   setTimeout(()=>{msg.style.display='none'}, 3000)
 }
  async function loadPosts(){
-  postsList.innerHTML = 'تيست'
+alert('الكود وصل هنا')
+postsList.innerHTML = 'تيست'
   
   const result = await supabaseClient.from('posts').select('*').order('id', {ascending: false})
   
