@@ -62,11 +62,8 @@ msg.style.color = type=='error'? '#721c24' : '#155724'
 setTimeout(()=>{msg.style.display='none'}, 3000)
 }
 
-// 5. عرض المقالات - R من CRUD
-async function loadPosts(){
-postsList.innerHTML = 'جاري جلب البيانات...'
-async function loadPosts(){
-postsList.innerHTML = 'جاري جلب البيانات...'
+// 5. عرض المقالات - R من CRUDasync function loadPosts(){
+postsList.innerHTML = 'تيست...'
 
 const result = await supabaseClient.from('posts').select('*').order('id', {ascending: false})
 
@@ -84,9 +81,11 @@ postsList.innerHTML = result.data.map(p=>`
 <div class="post-item">
 <b>${p.id}. ${p.title}</b><br>
 <small>${p.content.substring(0,50)}...</small><br>
+<button class="btn-edit" onclick="editPost(${p.id},'${p.title.replace(/'/g,"\\'")}','${p.content.replace(/'/g,"\\'")}','${p.image||''}')">✏️ تعديل</button>
 <button class="btn-delete" onclick="deletePost(${p.id})">🗑️ حذف</button>
 </div>
 `).join('')
+}
 }
 
 // 6. الحفظ والتعديل - C و U من CRUD
