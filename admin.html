@@ -64,24 +64,26 @@ setTimeout(()=>{msg.style.display='none'}, 3000)
 
 // 5. عرض المقالات - R من CRUD
 async function loadPosts(){
-const {data, error} = await supabaseClient.from('posts').select('*').order('id', {ascending: false})
+postsList.innerHTML = 'جاري جلب البيانات...'
+async function loadPosts(){
+postsList.innerHTML = 'جاري جلب البيانات...'
 
-if(error){
-postsList.innerHTML = 'الخطأ هو: ' + error.message + ' - الكود: ' + error.code
-showMsg('فيه مشكلة', 'error')
+const result = await supabaseClient.from('posts').select('*').order('id', {ascending: false})
+
+if(result.error){
+postsList.innerHTML = '❌ الخطأ: ' + result.error.message + '<br>الكود: ' + result.error.code
 return
 }
 
-if(data.length==0){
+if(result.data.length==0){
 postsList.innerHTML = 'لا يوجد مقالات'
 return
 }
 
-postsList.innerHTML = data.map(p=>`
+postsList.innerHTML = result.data.map(p=>`
 <div class="post-item">
 <b>${p.id}. ${p.title}</b><br>
 <small>${p.content.substring(0,50)}...</small><br>
-<button class="btn-edit" onclick="editPost(${p.id},'${p.title.replace(/'/g,"\\'")}','${p.content.replace(/'/g,"\\'")}','${p.image||''}')">✏️ تعديل</button>
 <button class="btn-delete" onclick="deletePost(${p.id})">🗑️ حذف</button>
 </div>
 `).join('')
