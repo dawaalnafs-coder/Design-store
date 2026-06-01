@@ -2,60 +2,256 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>لوحة التحكم - دواء النفس</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم نور وهدى</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{font-family:Tajawal,Arial;background:#0f172a;color:#e2e8f0;padding:20px}
-.card{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:15px}
-input,textarea{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e2e8f0}
-button{background:#3b82f6;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer}
-.post{border:1px solid #334155;padding:12px;margin:10px 0;border-radius:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Tajawal',Arial,sans-serif;background:#0f172a;color:#e2e8f0;padding:20px}
+.container{max-width:950px;margin:0 auto}
+h1{text-align:center;margin-bottom:30px;color:#fbbf24;font-size:2.2rem}
+.card{background:#1e293b;border-radius:12px;padding:25px;margin-bottom:20px;border:1px solid #334155}
+input,textarea,select{width:100%;padding:12px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:16px;margin-bottom:12px;font-family:inherit}
+textarea{min-height:140px;resize:vertical}
+button{background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:bold;margin-left:8px}
+button:hover{background:#d97706}
+.btn-danger{background:#ef4444}
+.btn-danger:hover{background:#dc2626}
+.btn-success{background:#22c55e}
+.btn-success:hover{background:#16a34a}
+.btn-edit{background:#3b82f6}
+.btn-edit:hover{background:#2563eb}
+.filters{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+.filters input, .filters select{flex:1;min-width:180px}
+.post-item{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:18px;margin-bottom:12px}
+.post-item h3{color:#fbbf24;margin-bottom:8px;font-size:1.3rem}
+.post-item p{color:#cbd5e1;font-size:15px;margin-bottom:10px;white-space:pre-wrap}
+.post-item img{max-width:180px;border-radius:6px;margin-top:8px}
+.post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.edit-mode input,.edit-mode textarea{margin-bottom:8px}
+.badge{display:inline-block;padding:5px 10px;border-radius:5px;font-size:12px;margin-left:8px}
+.badge.published{background:#166534;color:#bbf7d0}
+.badge.draft{background:#78350f;color:#fde68a}
+.msg{padding:12px;border-radius:6px;margin-bottom:15px;display:none;font-weight:bold}
+.msg.success{background:#166534;color:#bbf7d0}
+.msg.error{background:#991b1b;color:#fecaca}
+.stats{color:#94a3b8;font-size:14px;margin-bottom:15px}
+label{display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer}
 </style>
 </head>
 <body>
-<h1>لوحة تحكم دواء النفس</h1>
+<div class="container">
+<h1>✨ لوحة تحكم نور وهدى</h1>
 
+<div id="msg" class="msg"></div>
+
+<!-- إضافة منشور -->
 <div class="card">
-<h3>إضافة منشور جديد</h3>
-<input id="title" placeholder="عنوان المنشور">
-<textarea id="content" placeholder="محتوى المنشور" rows="4"></textarea>
-<button onclick="addPost()">نشر</button>
+<h2>إضافة منشور جديد</h2>
+<input type="text" id="title" placeholder="عنوان المنشور">
+<textarea id="content" placeholder="محتوى المنشور - الخاطرة"></textarea>
+<input type="text" id="image_url" placeholder="رابط الصورة اختياري">
+<label>
+<input type="checkbox" id="published" checked> نشر الآن في الصفحة الرسمية
+</label>
+<button class="btn-success" onclick="addPost()">نشر المنشور</button>
 </div>
 
+<!-- البحث والفلترة -->
 <div class="card">
-<h3>المنشورات</h3>
-<div id="postsList">جاري التحميل...</div>
+<h2>إدارة المنشورات</h2>
+<div class="stats" id="stats">جاري التحميل...</div>
+<div class="filters">
+<input type="text" id="search" placeholder="🔍 ابحث بالعنوان أو المحتوى" oninput="filterPosts()">
+<select id="filterStatus" onchange="filterPosts()">
+<option value="all">كل الحالات</option>
+<option value="true">منشور للعامة</option>
+<option value="false">مسودة مخفية</option>
+</select>
+</div>
+<div id="posts">جاري التحميل...</div>
+</div>
+
 </div>
 
 <script>
-alert('لو شفتني يبقى السكريبت شغال 100%');
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
+let allPosts = []
+let editId = null
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+function showMsg(text, type){
+const m = document.getElementById('msg')
+m.textContent = text
+m.className = 'msg ' + type
+m.style.display = 'block'
+setTimeout(()=>m.style.display='none', 3000)
+}
 
 async function loadPosts(){
-    const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', {ascending: false});
-    const list = document.getElementById('postsList');
-    if(error){ list.innerHTML = 'خطأ: ' + error.message; return; }
-    if(!data || data.length === 0){ list.innerHTML = 'لا توجد منشورات بعد'; return; }
-    list.innerHTML = data.map(p => `<div class="post"><b>${p.title}</b><br>${p.content}</div>`).join('');
+const {data, error} = await supabase
+.from('posts')
+.select('*')
+.order('created_at', {ascending: false})
+
+if(error){
+showMsg('خطأ: ' + error.message, 'error')
+return
+}
+
+allPosts = data
+updateStats()
+renderPosts(allPosts)
+}
+
+function updateStats(){
+const published = allPosts.filter(p=>p.published).length
+const drafts = allPosts.length - published
+document.getElementById('stats').innerHTML = 
+`إجمالي المنشورات: ${allPosts.length} | 
+<span style="color:#22c55e">منشور: ${published}</span> | 
+<span style="color:#f59e0b">مسودة: ${drafts}</span>`
+}
+
+function renderPosts(posts){
+const postsDiv = document.getElementById('posts')
+if(!posts.length){
+postsDiv.innerHTML = '<p style="color:#64748b">لا توجد منشورات</p>'
+return
+}
+
+postsDiv.innerHTML = posts.map(p=>{
+const isEdit = editId === p.id
+const badge = p.published? '<span class="badge published">منشور</span>' : '<span class="badge draft">مسودة</span>'
+const date = new Date(p.created_at).toLocaleDateString('ar-EG')
+
+if(isEdit){
+return `
+<div class="post-item edit-mode">
+<input type="text" id="edit-title-${p.id}" value="${p.title || ''}" placeholder="العنوان">
+<textarea id="edit-content-${p.id}" placeholder="المحتوى">${p.content || ''}</textarea>
+<input type="text" id="edit-image-${p.id}" value="${p.image_url || ''}" placeholder="رابط الصورة">
+<label>
+<input type="checkbox" id="edit-published-${p.id}" ${p.published? 'checked' : ''}> منشور للعامة
+</label>
+<div class="post-actions">
+<button class="btn-success" onclick="saveEdit(${p.id})">حفظ التعديل</button>
+<button onclick="cancelEdit()">إلغاء</button>
+</div>
+</div>
+`
+}
+
+return `
+<div class="post-item">
+<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+<h3>${p.title || 'بدون عنوان'} ${badge}</h3>
+<small style="color:#64748b">${date}</small>
+</div>
+<p>${p.content || ''}</p>
+${p.image_url? `<img src="${p.image_url}" alt="">` : ''}
+<div class="post-actions">
+<button class="btn-edit" onclick="startEdit(${p.id})">تعديل</button>
+<button class="btn-danger" onclick="deletePost(${p.id})">حذف نهائي</button>
+<button onclick="togglePublish(${p.id}, ${!p.published})">${p.published? 'إخفاء من الموقع' : 'نشر في الموقع'}</button>
+</div>
+</div>
+`
+}).join('')
 }
 
 async function addPost(){
-    const title = document.getElementById('title').value;
-    const content = document.getElementById('content').value;
-    if(!title || !content){ alert('اكتب العنوان والمحتوى'); return; }
-    const { error } = await supabaseClient.from('posts').insert([{title, content}]);
-    if(error){ alert('خطأ: ' + error.message); return; }
-    alert('تم النشر');
-    document.getElementById('title').value = '';
-    document.getElementById('content').value = '';
-    loadPosts();
+const title = document.getElementById('title').value.trim()
+const content = document.getElementById('content').value.trim()
+const image_url = document.getElementById('image_url').value.trim()
+const published = document.getElementById('published').checked
+
+if(!title ||!content){
+showMsg('اكتب العنوان والمحتوى', 'error')
+return
 }
 
-loadPosts();
+const {error} = await supabase.from('posts').insert([{
+title, content, image_url: image_url || null, published
+}])
+
+if(error){
+showMsg('خطأ في النشر: ' + error.message, 'error')
+return
+}
+
+showMsg('تم النشر بنجاح ✓', 'success')
+document.getElementById('title').value = ''
+document.getElementById('content').value = ''
+document.getElementById('image_url').value = ''
+loadPosts()
+}
+
+function startEdit(id){
+editId = id
+renderPosts(allPosts)
+}
+
+function cancelEdit(){
+editId = null
+renderPosts(allPosts)
+}
+
+async function saveEdit(id){
+const title = document.getElementById(`edit-title-${id}`).value.trim()
+const content = document.getElementById(`edit-content-${id}`).value.trim()
+const image_url = document.getElementById(`edit-image-${id}`).value.trim()
+const published = document.getElementById(`edit-published-${id}`).checked
+
+const {error} = await supabase.from('posts').update({title, content, image_url: image_url || null, published}).eq('id', id)
+
+if(error){
+showMsg('خطأ في الحفظ: ' + error.message, 'error')
+return
+}
+
+showMsg('تم حفظ التعديل ✓', 'success')
+editId = null
+loadPosts()
+}
+
+async function deletePost(id){
+if(!confirm('متأكد من الحذف النهائي؟')) return
+const {error} = await supabase.from('posts').delete().eq('id', id)
+if(error){
+showMsg('خطأ في الحذف', 'error')
+return
+}
+showMsg('تم الحذف ✓', 'success')
+loadPosts()
+}
+
+async function togglePublish(id, status){
+const {error} = await supabase.from('posts').update({published: status}).eq('id', id)
+if(error){
+showMsg('خطأ', 'error')
+return
+}
+showMsg(status? 'تم النشر في الموقع ✓' : 'تم إخفاء المنشور', 'success')
+loadPosts()
+}
+
+function filterPosts(){
+const search = document.getElementById('search').value.toLowerCase()
+const status = document.getElementById('filterStatus').value
+
+let filtered = allPosts.filter(p=>{
+const matchSearch = p.title?.toLowerCase().includes(search) || p.content?.toLowerCase().includes(search)
+const matchStatus = status === 'all' || String(p.published) === status
+return matchSearch && matchStatus
+})
+
+renderPosts(filtered)
+}
+
+loadPosts()
 </script>
 </body>
 </html>
