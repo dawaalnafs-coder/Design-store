@@ -62,29 +62,30 @@ msg.style.color = type=='error'? '#721c24' : '#155724'
 setTimeout(()=>{msg.style.display='none'}, 3000)
 }
 
-// 5. عرض المقالات - R من CRUDasync function loadPosts(){
-postsList.innerHTML = 'تيست...'
-
-const result = await supabaseClient.from('posts').select('*').order('id', {ascending: false})
-
-if(result.error){
-postsList.innerHTML = '❌ الخطأ: ' + result.error.message + '<br>الكود: ' + result.error.code
-return
+ async function loadPosts(){
+  postsList.innerHTML = 'تيست'
+  
+  const result = await supabaseClient.from('posts').select('*').order('id', {ascending: false})
+  
+  if(result.error){
+    postsList.innerHTML = 'خطأ Supabase: ' + result.error.message
+    return
+  }
+  
+  if(result.data.length == 0){
+    postsList.innerHTML = 'لا يوجد مقالات'
+    return
+  }
+  
+  postsList.innerHTML = result.data.map(p=>`
+    <div class="post-item">
+      <b>${p.id}. ${p.title}</b><br>
+      <small>${p.content.substring(0,50)}...</small><br>
+      <button class="btn-edit" onclick="editPost(${p.id},'${p.title.replace(/'/g,"\\'")}','${p.content.replace(/'/g,"\\'")}','${p.image||''}')">✏️ تعديل</button>
+      <button class="btn-delete" onclick="deletePost(${p.id})">🗑️ حذف</button>
+    </div>
+  `).join('')
 }
-
-if(result.data.length==0){
-postsList.innerHTML = 'لا يوجد مقالات'
-return
-}
-
-postsList.innerHTML = result.data.map(p=>`
-<div class="post-item">
-<b>${p.id}. ${p.title}</b><br>
-<small>${p.content.substring(0,50)}...</small><br>
-<button class="btn-edit" onclick="editPost(${p.id},'${p.title.replace(/'/g,"\\'")}','${p.content.replace(/'/g,"\\'")}','${p.image||''}')">✏️ تعديل</button>
-<button class="btn-delete" onclick="deletePost(${p.id})">🗑️ حذف</button>
-</div>
-`).join('')
 }
 }
 
