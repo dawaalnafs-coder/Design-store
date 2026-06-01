@@ -38,28 +38,25 @@ input,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border
 </div>
 
 <script>
-const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'       
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
 
 // 2. انشاء الاتصال
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 3. جلب العناصر مرة واحدة
-const title = document.getElementById('title')
-const content = document.getElementById('content')
-const image = document.getElementById('image')
-const postId = document.getElementById('postId')
-const msg = document.getElementById('msg')
-const postsList = document.getElementById('postsList')
+const title = document.getElementById('title');
+const content = document.getElementById('content');
+const image = document.getElementById('image');
+const postId = document.getElementById('postId');
+const msg = document.getElementById('msg');
+const postsList = document.getElementById('postsList');
 
-// 4. رسائل التنبيه
-// 4. رسائل التنبيه
-function showMsg(text, type){
-  msg.style.display = 'block'
-  msg.innerText = text
-  msg.style.background = type=='error'? '#f8d7da' : '#d4edda'
-  msg.style.color = type=='error'? '#721c24' : '#155724'
-  setTimeout(()=>{msg.style.display='none'}, 3000)
+function showMsg(text, color='green'){
+    msg.innerText = text;
+    msg.style.color = color;
+    setTimeout(()=>{msg.innerText=''},3000);
+}
 }
  async function loadPosts(){
 alert('الكود وصل هنا')
