@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>اختبار Supabase</title>
+</head>
+<body style="font-family:tahoma;padding:30px;background:#1a1a1a;color:#eee">
+<h2>نتيجة الاختبار:</h2>
+<pre id="result" style="background:#2a2a2a;padding:20px;border-radius:8px;white-space:pre-wrap">جاري التحميل...</pre>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+const result = document.getElementById('result')
+
+async function test() {
+  try {
+    result.textContent = '1. بختبر الاتصال بـ Supabase...\n'
+    
+    const {data, error} = await supabase.from('posts').select('id,title,published').limit(3)
+    
+    if(error) {
+      result.textContent += '❌ خطأ: ' + error.message + '\n'
+      result.textContent += 'الكود: ' + error.code
+      return
+    }
+    
+    result.textContent += '✅ الاتصال ناجح!\n'
+    result.textContent += 'عدد المنشورات: ' + data.length + '\n\n'
+    
+    if(data.length > 0) {
+      data.forEach(p => {
+        result.textContent += `- ${p.title} | منشور: ${p.published}\n`
+      })
+    } else {
+      result.textContent += '⚠️ الجدول فاضي. اعمل منشور الأول من admin.html'
+    }
+  } catch(e) {
+    result.textContent = '❌ خطأ في الكود: ' + e.message
+  }
+}
+
+test()
+</script>
+</body>
+</html>
