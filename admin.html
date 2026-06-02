@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم</title>
+<style>
+body{font-family:Tajawal,sans-serif;background:#f5f7fa;margin:0;padding:20px}
+.container{max-width:900px;margin:0 auto;background:white;padding:30px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+h1{text-align:center;color:#2c3e50}
+input,textarea{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:8px;font-size:16px}
+button{background:#3498db;color:white;border:none;padding:14px 25px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:bold;margin:5px}
+button:hover{background:#2980b9}
+#loginBox{text-align:center;padding:100px 20px}
+#loginBox input{width:280px}
+table{width:100%;border-collapse:collapse;margin-top:30px}
+th,td{padding:12px;text-align:right;border-bottom:1px solid #ddd}
+th{background:#3498db;color:white}
+img{border-radius:5px}
+</style>
+</head>
+<body>
+
+<div id="loginBox">
+<h1>🔐 لوحة تحكم الموقع</h1>
+<p>ادخل كلمة السر للمتابعة</p>
+<input type="password" id="passInput" placeholder="كلمة السر">
+<br><br>
+<button onclick="checkPass()">دخول</button>
+<p id="errorMsg" style="color:red;display:none">❌ كلمة السر خاطئة</p>
+</div>
+
+  <div id="adminPanel" style="display:none">
+<div class="container">
+<h1>⚡ إدارة البوستات</h1>
+
+<form id="postForm">
+<h3 id="formTitle">إضافة بوست جديد</h3>
+<input type="hidden" id="postId">
+<input type="text" id="title" placeholder="عنوان البوست" required>
+<textarea id="content" placeholder="محتوى البوست" rows="6" required></textarea>
+<label>📷 الصورة</label>
+<input type="file" id="imageFile" accept="image/*">
+<img id="imagePreview" style="max-width:150px;display:none;margin-top:10px;border-radius:8px">
+<input type="hidden" id="imageUrl">
+<br><label><input type="checkbox" id="published"> نشر البوست الآن</label>
+<br><br>
+<button type="submit">💾 حفظ البوست</button>
+<button type="button" onclick="resetForm()">➕ بوست جديد</button>
+</form>
+
+<h3 style="margin-top:50px">📋 البوستات</h3>
+<div id="statusMsg" style="color:#74c3e5;margin:10px 0"></div>
+<table>
+<thead>
+<tr>
+<th>العنوان</th>
+<th>الحالة</th>
+<th>صورة</th>
+<th>تحكم</th>
+</tr>
+</thead>
+<tbody id="postsTable"></tbody>
+</table>
+</div>
+</div>
+
+<script>
+const PASSWORD = 'mysecret1999';
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
+
+let supabase = null;
+let posts = [];
+let editingId = null;
+
+function checkPass() {
+let pass = document.getElementById('passInput').value.trim();
+if(pass === PASSWORD) {
+document.getElementById('loginBox').style.display = 'none';
+document.getElementById('adminPanel').style.display = 'block';
+initSupabase();
+} else {
+document.getElementById('errorMsg').style.display = 'block';
+document.getElementById('passInput').value = '';
+}
+}
+
+function initSupabase() {
+const script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+script.onload = () => {
+supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+loadPosts();
+setupForm();
+setupImageUpload();
+};
+document.head.appendChild(script);
+}
+
+async function loadPosts() {
+const { data, error } = await supabase.from('posts').select('*').order('created_at', {ascending:false});
+if(error) {
+document.getElementById('statusMsg').innerText = 'خطأ: ' + error.message;
+return;
+}
+posts = data;
+renderPosts();
+}
+
+
+  function renderPosts() {
+const tbody = document.getElementById('postsTable');
+tbody.innerHTML = '';
+if(posts.length === 0) {
+tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px">لا يوجد بوستات بعد</td></tr>';
+return;
+}
+for(let i = 0; i < posts.length; i++) {
+let post = posts[i];
+tbody.innerHTML += '<tr>' +
+'<td>' + post.title + '</td>' +
+'<td>' + (post.published? 'منشور' : 'مسودة') + '</td>' +
+'<td>' + (post.image_url? '<img src="'+post.image_url+'" width="50">' : '-') + '</td>' +
+'<td>' +
+'<button onclick="editPost('+post.id+')">تعديل</button> ' +
+'<button onclick="deletePost('+post.id+')">حذف</button>' +
+'</td>' +
+'</tr>';
+}
+}
+
+function setupForm() {
+document.getElementById('postForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+const title = document.getElementById('title').value;
+const content = document.getElementById('content').value;
+const published = document.getElementById('published').checked;
+const image_url = document.getElementById('imageUrl').value;
+
+if(editingId) {
+await supabase.from('posts').update({title, content, published, image_url}).eq('id', editingId);
+alert('✅ تم التعديل');
+} else {
+await supabase.from('posts').insert([{title, content, published, image_url}]);
+alert('✅ تم النشر');
+}
+resetForm();
+loadPosts();
+});
+}
+
+function setupImageUpload() {
+document.getElementById('imageFile').addEventListener('change', async (e) => {
+const file = e.target.files[0];
+if(!file) return;
+const fileName = Date.now() + '-' + file.name;
+const { data, error } = await supabase.storage.from('images').upload(fileName, file);
+if(error) return alert('خطأ رفع الصورة');
+const url = SUPABASE_URL + '/storage/v1/object/public/images/' + data.path;
+document.getElementById('imageUrl').value = url;
+document.getElementById('imagePreview').src = url;
+document.getElementById('imagePreview').style.display = 'block';
+});
+}
+
+function editPost(postId) {
+editingId = postId;
+let post = posts.find(p => p.id === postId);
+document.getElementById('formTitle').innerText = 'تعديل البوست';
+document.getElementById('title').value = post.title;
+document.getElementById('content').value = post.content;
+document.getElementById('published').checked = post.published;
+document.getElementById('imageUrl').value = post.image_url || '';
+if(post.image_url) {
+document.getElementById('imagePreview').src = post.image_url;
+document.getElementById('imagePreview').style.display = 'block';
+}
+window.scrollTo(0,0);
+}
+
+async function deletePost(id) {
+if(confirm('متأكد عايز تحذف البوست؟')) {
+await supabase.from('posts').delete().eq('id', id);
+alert('🗑️ تم الحذف');
+loadPosts();
+}
+}
+
+function resetForm() {
+editingId = null;
+document.getElementById('formTitle').innerText = 'إضافة بوست جديد';
+document.getElementById('postForm').reset();
+document.getElementById('imagePreview').style.display = 'none';
+document.getElementById('imageUrl').value = '';
+}
+</script>
+</body>
+</html>
