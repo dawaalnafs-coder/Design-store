@@ -92,7 +92,6 @@ setTimeout(()=>m.style.display='none', 3000)
 }
 
 async function loadPosts(){
-async function loadPosts(){
   try {
     document.getElementById('posts').innerHTML = 'جاري التحميل...'
 
@@ -127,10 +126,12 @@ document.getElementById('stats').innerHTML =
 }
 
 function renderPosts(posts){
-const postsDiv = document.getElementById('posts')
-if(!posts.length){
-postsDiv.innerHTML = '<p style="color:#64748b">لا توجد منشورات</p>'
-return
+  const postsDiv = document.getElementById('posts')
+  
+  // لو مفيش بوستات خالص
+  if(!posts || posts.length === 0){
+    postsDiv.innerHTML = 'مفيش بوستات لسه. ضيف أول بوست'
+    return}
 }
 
 postsDiv.innerHTML = posts.map(p=>{
