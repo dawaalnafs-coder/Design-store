@@ -92,18 +92,30 @@ setTimeout(()=>m.style.display='none', 3000)
 }
 
 async function loadPosts(){
+  const postsDiv = document.getElementById('posts')
+  postsDiv.innerHTML = 'جاري التحميل...'
+  
   try {
-    document.getElementById('posts').innerHTML = 'جاري التحميل...'
-
-    const {data, error} = await supabase
-    .from('posts')
-    .select('*')
-    .order('created_at', {ascending: false})
-
-    if(error){
-      showMsg('خطأ: ' + error.message, 'error')
-      document.getElementById('posts').innerHTML = 'فشل التحميل: ' + error.message
-      return
+    console.log('1. بدأت التحميل') // للتشخيص
+    
+    if(typeof supabase === 'undefined'){
+      throw new Error('supabase مش متعرف. اتأكد من createClient')
+    }
+    
+    console.log('2. supabase شغال')
+    
+    const { data, error } = await supabase.from('posts').select('*').order('created_at', {ascending:false})
+    
+    console.log('3. الداتا رجعت:', data) // للتشخيص
+    
+    if(error) throw error
+    
+    renderPosts(data)
+    
+  } catch(err) {
+    console.error('خطأ كامل:', err)
+    postsDiv.innerHTML = 'خطأ فادح: ' + err.message // دي هتقول المشكلة
+  }      return
     }
 
     allPosts = data
