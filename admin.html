@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم</title>
+<style>
+body{font-family:'Tajawal',sans-serif;background:#f5f7fa;margin:0;padding:20px}
+.container{max-width:900px;margin:0 auto;background:white;padding:30px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+h1{text-align:center;color:#2c3e50}
+input,textarea{width:100%;padding:12px;margin:8px 0;border:2px solid #ddd;border-radius:8px;font-size:16px}
+button{background:#3498db;color:white;border:none;padding:14px 25px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:bold}
+#loginBox{text-align:center;padding:100px 20px}
+#loginBox input{width:280px}
+#errorMsg{color:red;display:none;margin-top:15px}
+table{width:100%;border-collapse:collapse;margin-top:30px}
+th,td{padding:12px;text-align:right;border-bottom:1px solid #ddd}
+th{background:#3498db;color:white}
+</style>
+</head>
+<body>
+
+<div id="loginBox">
+<h1>🔐 لوحة تحكم المدونة</h1>
+<p>ادخل كلمة السر للمتابعة</p>
+<input type="password" id="passInput" placeholder="كلمة السر">
+<br><br>
+
+<button onclick="checkPass()">دخول</button>
+<p id="errorMsg">❌ كلمة السر خاطئة!</p>
+</div>
+
+<div id="adminPanel" style="display:none">
+<div class="container">
+<h1>📝 إدارة البوستات</h1>
+  <form id="postForm">
+<h3 id="formTitle">إضافة بوست جديد</h3>
+<input type="hidden" id="postId">
+<input type="text" id="title" placeholder="عنوان البوست" required>
+<textarea id="content" placeholder="محتوى البوست" rows="6" required></textarea>
+<label>📸 صورة الغلاف:</label>
+<input type="file" id="imageFile" accept="image/*">
+<img id="imagePreview" style="max-width:150px;display:none;margin-top:10px;border-radius:8px">
+<input type="hidden" id="imageUrl">
+<br><label><input type="checkbox" id="published"> نشر البوست الآن</label>
+<br><br>
+<button type="submit">💾 حفظ البوست</button>
+<button type="button" onclick="resetForm()">➕ بوست جديد</button>
+</form>
+
+<h3 style="margin-top:50px">📋 كل البوستات</h3>
+<div id="statusMsg" style="color:#e74c3c;margin:10px 0"></div>
+<table>
+<thead><tr><th>العنوان</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+<tbody id="postsTable"><tr><td colspan="3" style="text-align:center;padding:20px">اضغط دخول أولاً</td></tr></tbody>
+</table>
+</div></div>
+  <script>
+const PASSWORD = 'mysecret1999';
+// غير السطرين دول بروابط Supabase بتوعك
+const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
+
+let supabase = null;
+
+function checkPass() {
+    let pass = document.getElementById('passInput').value.trim();
+    if(pass === PASSWORD) {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        initSupabase(); // نشغل Supabase بعد ما ندخل بس
+    } else {
+        document.getElementById('errorMsg').style.display = 'block';
+    }
+}
+
+function initSupabase() {
+    try {
+        // نحمل Supabase بس بعد الباسورد
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.onload = () => {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            loadPosts();
+            setupForm();
+        };
+        script.onerror = () => {
+            document.getElementById('statusMsg').innerText = 'خطأ في تحميل Supabase. اتأكد من النت';
+        };
+        document.head.appendChild(script);
+    } catch(e) {
+        document.getElementById('statusMsg').innerText = 'خطأ: ' + e.message;
+    }
+}
+
+async function loadPosts() {
+    if(!supabase) return;
+    try {
+        const {data, error} = await supabase.from('posts').select('*').order('created_at', {ascending:false});
+        if(error) throw error;
+        
+        const tbody = document.getElementById('postsTable');
+        if(!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px">لا توجد بوستات بعد</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(p => `
+            <tr>
+                <td>${p.title}</td>
+                <td>${p.published? '✅ منشور' : '📝 مسودة'}</td>
+                <td><button onclick="alert('التعديل شغال')">تعديل</button></td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        document.getElementById('statusMsg').innerText = 'خطأ في جلب البوستات: ' + e.message;
+    }
+}
+
+function setupForm() {
+    document.getElementById('postForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alert('تمام! الباسورد + Supabase شغالين. نكمل كود الإضافة بعدين');
+    });
+}
+
+function resetForm() {
+    document.getElementById('postForm').reset();
+    document.getElementById('imagePreview').style.display = 'none';
+}
+
+document.getElementById('passInput').addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') checkPass();
+});
+</script>
+</body>
+</html>
