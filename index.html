@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>متجري - المتجر المتكامل</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
       margin: 0;
@@ -27,7 +26,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -36,14 +35,11 @@
     .navbar-brand {
       font-size: 24px;
       font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .navbar-menu {
       display: flex;
-      gap: 20px;
+      gap: 15px;
       align-items: center;
       list-style: none;
     }
@@ -52,29 +48,16 @@
       color: white;
       text-decoration: none;
       cursor: pointer;
-      padding: 8px 15px;
+      padding: 8px 12px;
       border-radius: 6px;
       transition: all 0.3s;
       border: none;
       background: transparent;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .navbar-menu a:hover, .navbar-menu button:hover {
       background: rgba(255, 255, 255, 0.2);
-    }
-
-    .notification-badge {
-      background: #ff6b6b;
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
     }
 
     /* LOGIN PAGE */
@@ -89,7 +72,7 @@
 
     .login-card {
       background: white;
-      padding: 50px;
+      padding: 40px;
       border-radius: 15px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       text-align: center;
@@ -105,17 +88,16 @@
 
     .login-card p {
       color: #7f8c8d;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
     .login-input {
       width: 100%;
-      padding: 14px;
-      margin-bottom: 15px;
+      padding: 12px;
+      margin-bottom: 12px;
       border: 2px solid #ecf0f1;
       border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s;
+      font-size: 14px;
     }
 
     .login-input:focus {
@@ -125,31 +107,18 @@
 
     .login-btn {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       background: #667eea;
       color: white;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
     }
 
     .login-btn:hover {
       background: #764ba2;
-    }
-
-    .login-error {
-      color: #e74c3c;
-      margin-top: 15px;
-      display: none;
-    }
-
-    .toggle-link {
-      color: #667eea;
-      cursor: pointer;
-      text-decoration: underline;
     }
 
     /* MAIN LAYOUT */
@@ -164,32 +133,6 @@
       display: block;
     }
 
-    /* TABS */
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #ecf0f1;
-      flex-wrap: wrap;
-    }
-
-    .tab-button {
-      padding: 12px 20px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      color: #7f8c8d;
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s;
-    }
-
-    .tab-button.active {
-      color: #667eea;
-      border-bottom-color: #667eea;
-    }
-
     /* SECTIONS */
     .section {
       display: none;
@@ -201,8 +144,8 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     /* CARDS */
@@ -212,46 +155,38 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       padding: 20px;
       margin-bottom: 20px;
-      transition: all 0.3s;
-    }
-
-    .card:hover {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     }
 
     .card-header {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: #2c3e50;
       margin-bottom: 15px;
       padding-bottom: 10px;
       border-bottom: 2px solid #667eea;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
 
     /* FORM STYLES */
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       color: #2c3e50;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .form-group input,
     .form-group textarea,
     .form-group select {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       border: 2px solid #ecf0f1;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 13px;
       font-family: inherit;
     }
 
@@ -264,21 +199,21 @@
 
     .form-group textarea {
       resize: vertical;
-      min-height: 80px;
+      min-height: 70px;
     }
 
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 12px;
     }
 
     /* BUTTONS */
     .btn {
-      padding: 10px 20px;
+      padding: 8px 16px;
       border: none;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
@@ -287,6 +222,7 @@
     .btn-primary {
       background: #667eea;
       color: white;
+      width: 100%;
     }
 
     .btn-primary:hover {
@@ -302,293 +238,63 @@
       background: #7f8c8d;
     }
 
-    .btn-danger {
-      background: #e74c3c;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #c0392b;
-    }
-
-    .btn-success {
-      background: #27ae60;
-      color: white;
-    }
-
-    .btn-success:hover {
-      background: #229954;
-    }
-
     .btn-small {
-      padding: 6px 12px;
+      padding: 5px 10px;
       font-size: 12px;
-    }
-
-    .btn-block {
-      width: 100%;
-      margin-top: 10px;
     }
 
     /* POSTS */
     .post-item {
       background: #f8f9fa;
-      border-left: 4px solid #667eea;
-      padding: 15px;
-      margin-bottom: 15px;
+      border-left: 3px solid #667eea;
+      padding: 12px;
+      margin-bottom: 12px;
       border-radius: 6px;
-      transition: all 0.3s;
-    }
-
-    .post-item:hover {
-      border-left-color: #764ba2;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .post-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
     }
 
     .post-title {
-      font-size: 16px;
       font-weight: bold;
       color: #2c3e50;
+      margin-bottom: 5px;
     }
 
     .post-meta {
       color: #95a5a6;
-      font-size: 12px;
-    }
-
-    .post-author {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .post-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .post-content {
       color: #555;
-      margin: 10px 0;
-      line-height: 1.6;
-    }
-
-    .post-stats {
-      display: flex;
-      gap: 15px;
-      margin: 10px 0;
-      padding: 8px 0;
-      border-top: 1px solid #e0e0e0;
-      border-bottom: 1px solid #e0e0e0;
-      font-size: 12px;
-      color: #95a5a6;
-    }
-
-    .post-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .post-actions button {
-      flex: 1;
+      font-size: 13px;
+      margin: 8px 0;
     }
 
     /* GROUPS */
     .group-card {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 12px;
       cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .group-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
     }
 
     .group-name {
-      font-size: 18px;
       font-weight: bold;
       margin-bottom: 5px;
     }
 
     .group-info {
-      font-size: 13px;
+      font-size: 12px;
       opacity: 0.9;
-      margin: 3px 0;
-    }
-
-    .group-badge {
-      display: inline-block;
-      background: rgba(255, 255, 255, 0.3);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      margin-top: 8px;
-    }
-
-    /* MESSAGES */
-    .message-item {
-      background: #f8f9fa;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      border-left: 3px solid #667eea;
-    }
-
-    .message-sender {
-      font-weight: bold;
-      color: #667eea;
-      margin-bottom: 5px;
-      font-size: 13px;
-    }
-
-    .message-text {
-      color: #333;
-      margin-bottom: 5px;
-      line-height: 1.5;
-    }
-
-    .message-time {
-      font-size: 11px;
-      color: #95a5a6;
-    }
-
-    .message-bubble {
-      background: white;
-      padding: 12px 15px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      max-width: 70%;
-      word-wrap: break-word;
-    }
-
-    .message-bubble.sent {
-      margin-left: auto;
-      background: #667eea;
-      color: white;
-      margin-right: 0;
-    }
-
-    .message-bubble.received {
-      margin-right: auto;
-    }
-
-    /* COMMENTS */
-    .comment-section {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 6px;
-      margin-top: 15px;
-    }
-
-    .comment-item {
-      background: white;
-      padding: 10px;
-      border-radius: 4px;
-      margin-bottom: 8px;
-      border-left: 2px solid #667eea;
-    }
-
-    .comment-author {
-      font-weight: bold;
-      color: #667eea;
-      font-size: 13px;
-    }
-
-    .comment-text {
-      color: #555;
-      font-size: 13px;
-      margin-top: 5px;
-    }
-
-    .comment-time {
-      font-size: 11px;
-      color: #95a5a6;
-      margin-top: 3px;
-    }
-
-    /* PRODUCTS */
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .product-card {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s;
-    }
-
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    }
-
-    .product-image {
-      width: 100%;
-      height: 180px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-    }
-
-    .product-info {
-      padding: 15px;
-    }
-
-    .product-name {
-      font-weight: bold;
-      color: #2c3e50;
-      margin-bottom: 5px;
-    }
-
-    .product-price {
-      font-size: 18px;
-      font-weight: bold;
-      color: #667eea;
-      margin-bottom: 8px;
-    }
-
-    .product-desc {
-      font-size: 13px;
-      color: #7f8c8d;
-      margin-bottom: 10px;
     }
 
     /* ALERT */
     .alert {
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
       display: none;
-      animation: slideIn 0.3s;
     }
 
     .alert.show {
@@ -598,156 +304,30 @@
     .alert-success {
       background: #d4edda;
       color: #155724;
-      border: 1px solid #c3e6cb;
     }
 
     .alert-danger {
       background: #f8d7da;
       color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .alert-info {
-      background: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    /* GRID */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
     }
 
     /* EMPTY STATE */
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
+      padding: 30px 20px;
       color: #95a5a6;
-    }
-
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-
-    /* FILTER SECTION */
-    .filter-section {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .filter-section input, .filter-section select {
-      padding: 8px 12px;
-      border: 1px solid #ecf0f1;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-
-    /* MODAL */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .modal-header {
-      font-size: 20px;
-      font-weight: bold;
-      color: #2c3e50;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #7f8c8d;
     }
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .navbar-menu {
         flex-direction: column;
-        gap: 10px;
-        width: 100%;
+        gap: 8px;
       }
 
       .form-row {
         grid-template-columns: 1fr;
       }
-
-      .grid, .product-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .post-stats {
-        flex-wrap: wrap;
-      }
-
-      .message-bubble {
-        max-width: 90%;
-      }
-    }
-
-    /* LOADING SPINNER */
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -757,13 +337,11 @@
 <nav class="navbar">
   <div class="navbar-brand">🛒 متجري</div>
   <ul class="navbar-menu">
-    <li><a href="#" onclick="switchSection('feed')">🏠 الرئيسية</a></li>
     <li><a href="#" onclick="switchSection('posts')">📝 المنشورات</a></li>
     <li><a href="#" onclick="switchSection('groups')">👥 المجموعات</a></li>
-    <li><a href="#" onclick="switchSection('products')">📦 المنتجات</a></li>
-    <li><a href="#" onclick="switchSection('messages')">💬 الرسائل <span id="msgBadge" class="notification-badge" style="display:none;">0</span></a></li>
-    <li><a href="#" onclick="switchSection('profile')">👤 الملف</a></li>
-    <li><button class="btn btn-secondary btn-small" onclick="handleLogout()">🚪 خروج</button></li>
+    <li><a href="#" onclick="switchSection('messages')">💬 الرسائل</a></li>
+    <li><a href="admin.html" target="_blank">⚙️ الإدارة</a></li>
+    <li><button class="btn btn-secondary btn-small" onclick="handleLogout()">خروج</button></li>
   </ul>
 </nav>
 
@@ -771,36 +349,10 @@
 <div id="loginPage" class="login-container">
   <div class="login-card">
     <h1>🛒 متجري</h1>
-    <p>المتجر المتكامل للتواصل والتسوق والمجموعات</p>
-    
-    <div id="loginForm">
-      <div class="form-group">
-        <input type="text" id="loginUsername" class="login-input" placeholder="👤 اسم المستخدم" required>
-      </div>
-      <div class="form-group">
-        <input type="password" id="loginPassword" class="login-input" placeholder="🔑 كلمة السر" required>
-      </div>
-      <button class="login-btn" onclick="handleLogin()">دخول</button>
-      <div class="login-error" id="loginError">❌ بيانات دخول خاطئة</div>
-      <p style="color: #7f8c8d; margin-top: 20px; font-size: 13px;">
-        ليس لديك حساب؟ <span class="toggle-link" onclick="toggleSignup()">إنشاء حساب جديد</span>
-      </p>
-    </div>
-
-    <div id="signupForm" style="display: none;">
-      <h3 style="color: #2c3e50; margin-bottom: 15px;">إنشاء حساب جديد</h3>
-      <div class="form-group">
-        <input type="text" id="signupUsername" class="login-input" placeholder="👤 اسم المستخدم" required>
-      </div>
-      <div class="form-group">
-        <input type="email" id="signupEmail" class="login-input" placeholder="📧 البريد الإلكتروني" required>
-      </div>
-      <div class="form-group">
-        <input type="password" id="signupPassword" class="login-input" placeholder="🔑 كلمة السر" required>
-      </div>
-      <button class="login-btn" onclick="handleSignup()" style="margin-bottom: 10px;">✅ إنشاء الحساب</button>
-      <button class="btn btn-secondary btn-block" onclick="toggleSignup()">⬅️ العودة</button>
-    </div>
+    <p>منصة التواصل والتسوق والمجموعات</p>
+    <input type="text" id="username" class="login-input" placeholder="اسم المستخدم" required>
+    <input type="password" id="password" class="login-input" placeholder="كلمة السر" required>
+    <button class="login-btn" onclick="handleLogin()">دخول</button>
   </div>
 </div>
 
@@ -808,77 +360,25 @@
 <div id="mainContent" class="main-content">
   <div id="alertBox" class="alert"></div>
 
-  <!-- FEED SECTION (PUBLIC HOME) -->
-  <section id="feedSection" class="section active">
-    <div class="card">
-      <div class="card-header">📰 الخلاصة العامة</div>
-    </div>
-
-    <div class="filter-section">
-      <input type="text" placeholder="🔍 ابحث في الخلاصة..." id="feedSearch" onkeyup="filterFeed()">
-      <select id="feedFilter" onchange="filterFeed()">
-        <option value="">جميع المنشورات</option>
-        <option value="question">الأسئلة</option>
-        <option value="announcement">الإعلانات</option>
-        <option value="discussion">النقاشات</option>
-      </select>
-    </div>
-
-    <div id="feedList">
-      <div class="empty-state">
-        <div class="empty-state-icon">📭</div>
-        <p>جاري التحميل...</p>
-      </div>
-    </div>
-  </section>
-
   <!-- POSTS SECTION -->
-  <section id="postsSection" class="section">
+  <section id="postsSection" class="section active">
     <div class="card">
-      <div class="card-header">✍️ إنشاء منشور جديد</div>
+      <div class="card-header">📝 منشور جديد</div>
       <form onsubmit="savePost(event)">
         <div class="form-group">
-          <label>العنوان</label>
-          <input type="text" id="postTitle" placeholder="عنوان المنشور" required>
+          <input type="text" id="postTitle" placeholder="العنوان" required>
         </div>
         <div class="form-group">
-          <label>المحتوى</label>
-          <textarea id="postContent" placeholder="اكتب منشورك هنا... شارك أفكارك وتجاربك" required></textarea>
+          <textarea id="postContent" placeholder="المحتوى" required></textarea>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>نوع المنشور</label>
-            <select id="postType" required>
-              <option value="general">عام</option>
-              <option value="announcement">إعلان</option>
-              <option value="question">سؤال</option>
-              <option value="discussion">نقاش</option>
-              <option value="tutorial">درس تعليمي</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>الفئة</label>
-            <select id="postCategory" required>
-              <option value="general">عام</option>
-              <option value="tech">تقنية</option>
-              <option value="business">أعمال</option>
-              <option value="lifestyle">أسلوب حياة</option>
-              <option value="other">أخرى</option>
-            </select>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">📤 نشر المنشور</button>
+        <button type="submit" class="btn btn-primary">نشر</button>
       </form>
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <div>📋 منشوراتي</div>
-        <span id="postCount" class="badge">0</span>
-      </div>
-      <div id="postsList" class="empty-state">
-        <div class="empty-state-icon">📭</div>
-        <p>لم تنشر أي منشورات بعد</p>
+      <div class="card-header">📋 المنشورات</div>
+      <div id="postsList">
+        <div class="empty-state">📭 لا توجد منشورات</div>
       </div>
     </div>
   </section>
@@ -886,388 +386,93 @@
   <!-- GROUPS SECTION -->
   <section id="groupsSection" class="section">
     <div class="card">
-      <div class="card-header">➕ إنشاء مجموعة جديدة</div>
+      <div class="card-header">➕ مجموعة جديدة</div>
       <form onsubmit="saveGroup(event)">
         <div class="form-group">
-          <label>اسم المجموعة</label>
-          <input type="text" id="groupName" placeholder="مثال: مطورو الويب العرب" required>
+          <input type="text" id="groupName" placeholder="اسم المجموعة" required>
         </div>
         <div class="form-group">
-          <label>الوصف</label>
-          <textarea id="groupDesc" placeholder="وصف المجموعة والهدف منها..." required></textarea>
+          <textarea id="groupDesc" placeholder="الوصف" required></textarea>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>نوع المجموعة</label>
-            <select id="groupType" required>
-              <option value="public">عام</option>
-              <option value="private">خاص</option>
-              <option value="business">تجاري</option>
-              <option value="education">تعليمي</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>الفئة</label>
-            <select id="groupCategory" required>
-              <option value="general">عام</option>
-              <option value="tech">تقنية</option>
-              <option value="business">أعمال</option>
-              <option value="hobby">هوايات</option>
-            </select>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-success btn-block">✨ إنشاء المجموعة</button>
+        <button type="submit" class="btn btn-primary">إنشاء</button>
       </form>
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <div>👥 المجموعات</div>
-        <span id="groupCount" class="badge">0</span>
-      </div>
-      <div class="filter-section">
-        <input type="text" placeholder="🔍 ابحث عن مجموعة..." id="groupSearch" onkeyup="filterGroups()">
-        <select id="groupTypeFilter" onchange="filterGroups()">
-          <option value="">جميع المجموعات</option>
-          <option value="public">عام</option>
-          <option value="private">خاص</option>
-          <option value="business">تجاري</option>
-        </select>
-      </div>
-      <div id="groupsList" class="grid">
-        <div class="empty-state">
-          <div class="empty-state-icon">👥</div>
-          <p>لا توجد مجموعات حتى الآن</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRODUCTS SECTION -->
-  <section id="productsSection" class="section">
-    <div class="card">
-      <div class="card-header">➕ إضافة منتج للبيع</div>
-      <form onsubmit="saveProduct(event)">
-        <div class="form-row">
-          <div class="form-group">
-            <label>اسم المنتج</label>
-            <input type="text" id="productName" placeholder="اسم المنتج" required>
-          </div>
-          <div class="form-group">
-            <label>السعر</label>
-            <input type="number" id="productPrice" placeholder="السعر بالريال" step="0.01" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>الوصف</label>
-          <textarea id="productDesc" placeholder="وصف تفصيلي للمنتج..."></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>الفئة</label>
-            <select id="productCategory" required>
-              <option value="electronics">إلكترونيات</option>
-              <option value="clothing">ملابس</option>
-              <option value="books">كتب</option>
-              <option value="services">خدمات</option>
-              <option value="other">أخرى</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>الكمية المتاحة</label>
-            <input type="number" id="productQuantity" placeholder="العدد" min="1" required>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-success btn-block">💾 حفظ المنتج</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div>📦 المنتجات المتاحة</div>
-        <span id="productCount" class="badge">0</span>
-      </div>
-      <div class="filter-section">
-        <input type="text" placeholder="🔍 ابحث عن منتج..." id="productSearch" onkeyup="filterProducts()">
-        <select id="productCategoryFilter" onchange="filterProducts()">
-          <option value="">جميع الفئات</option>
-          <option value="electronics">إلكترونيات</option>
-          <option value="clothing">ملابس</option>
-          <option value="books">كتب</option>
-          <option value="services">خدمات</option>
-        </select>
-      </div>
-      <div id="productsList" class="product-grid">
-        <div class="empty-state">
-          <div class="empty-state-icon">📭</div>
-          <p>لا توجد منتجات حتى الآن</p>
-        </div>
+      <div class="card-header">👥 المجموعات</div>
+      <div id="groupsList">
+        <div class="empty-state">👥 لا توجد مجموعات</div>
       </div>
     </div>
   </section>
 
   <!-- MESSAGES SECTION -->
   <section id="messagesSection" class="section">
-    <div class="tabs">
-      <button class="tab-button active" onclick="switchMessagesTab('conversations')">💬 المحادثات</button>
-      <button class="tab-button" onclick="switchMessagesTab('new')">✏️ رسالة جديدة</button>
+    <div class="card">
+      <div class="card-header">💬 رسالة جديدة</div>
+      <form onsubmit="sendMessage(event)">
+        <div class="form-group">
+          <input type="text" id="messageTo" placeholder="المستقبل" required>
+        </div>
+        <div class="form-group">
+          <textarea id="messageText" placeholder="الرسالة" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">إرسال</button>
+      </form>
     </div>
 
-    <div id="conversationsTab" class="section active">
-      <div class="card">
-        <div class="card-header">💬 محادثاتي</div>
-        <div class="filter-section">
-          <input type="text" placeholder="🔍 ابحث في المحادثات..." id="conversationSearch" onkeyup="filterConversations()">
-        </div>
-        <div id="conversationsList" class="empty-state">
-          <div class="empty-state-icon">💌</div>
-          <p>لا توجد محادثات بعد</p>
-        </div>
-      </div>
-    </div>
-
-    <div id="newTab" class="section" style="display: none;">
-      <div class="card">
-        <div class="card-header">✏️ إرسال رسالة جديدة</div>
-        <form onsubmit="sendMessage(event)">
-          <div class="form-group">
-            <label>المستقبل</label>
-            <input type="text" id="messageTo" placeholder="اسم المستخدم الذي تريد مراسلته" required>
-          </div>
-          <div class="form-group">
-            <label>الرسالة</label>
-            <textarea id="messageContent" placeholder="اكتب رسالتك هنا..." required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">📤 إرسال</button>
-        </form>
+    <div class="card">
+      <div class="card-header">💬 المحادثات</div>
+      <div id="messagesList">
+        <div class="empty-state">💌 لا توجد رسائل</div>
       </div>
     </div>
   </section>
-
-  <!-- PROFILE SECTION -->
-  <section id="profileSection" class="section">
-    <div class="card">
-      <div class="card-header">👤 الملف الشخصي</div>
-      <div class="form-group">
-        <label>اسم المستخدم</label>
-        <input type="text" id="profileUsername" readonly style="background: #f0f0f0;">
-      </div>
-      <div class="form-group">
-        <label>البريد الإلكتروني</label>
-        <input type="email" id="profileEmail" readonly style="background: #f0f0f0;">
-      </div>
-      <div class="form-group">
-        <label>السيرة الذاتية</label>
-        <textarea id="profileBio" placeholder="اكتب عن نفسك، اهتماماتك، وتخصصك..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>رقم الهاتف (اختياري)</label>
-        <input type="tel" id="profilePhone" placeholder="رقم الهاتف">
-      </div>
-      <button class="btn btn-primary btn-block" onclick="updateProfile()">💾 حفظ التغييرات</button>
-    </div>
-
-    <div class="card">
-      <div class="card-header">📊 الإحصائيات</div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
-        <div>
-          <div style="font-size: 24px; font-weight: bold; color: #667eea;" id="userPostsCount">0</div>
-          <div style="color: #95a5a6; font-size: 12px;">المنشورات</div>
-        </div>
-        <div>
-          <div style="font-size: 24px; font-weight: bold; color: #764ba2;" id="userGroupsCount">0</div>
-          <div style="color: #95a5a6; font-size: 12px;">المجموعات</div>
-        </div>
-        <div>
-          <div style="font-size: 24px; font-weight: bold; color: #27ae60;" id="userProductsCount">0</div>
-          <div style="color: #95a5a6; font-size: 12px;">المنتجات</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">🔐 الأمان</div>
-      <button class="btn btn-danger btn-block" onclick="handleLogout()">🚪 تسجيل الخروج من جميع الأجهزة</button>
-    </div>
-  </section>
-</div>
-
-<!-- GROUP MODAL -->
-<div id="groupModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2 id="modalGroupName"></h2>
-      <button class="modal-close" onclick="closeGroupModal()">✕</button>
-    </div>
-    <div id="groupModalBody"></div>
-  </div>
 </div>
 
 <script>
-  // CONFIG
   const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppU';
   const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-  let currentUser = null;
-  let allPosts = [];
-  let allGroups = [];
-  let allProducts = [];
-
-  // INIT
-  window.addEventListener('load', () => {
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      currentUser = JSON.parse(user);
-      showMainContent();
-      loadData();
-    }
-  });
-
-  async function loadData() {
-    await loadFeed();
-    await loadPosts();
-    await loadGroups();
-    await loadProducts();
-    updateUserStats();
-  }
-
-  // ALERT
-  function showAlert(message, type = 'info') {
-    const alertBox = document.getElementById('alertBox');
-    alertBox.textContent = message;
-    alertBox.className = `alert show alert-${type}`;
-    setTimeout(() => alertBox.classList.remove('show'), 4000);
-  }
+  let user = null;
 
   // LOGIN
   async function handleLogin() {
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-    if (!username || !password) {
-      document.getElementById('loginError').style.display = 'block';
-      return;
-    }
+    if (!username || !password) return;
 
-    currentUser = { 
-      username, 
-      email: username + '@store.com',
-      bio: '',
-      phone: ''
-    };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    document.getElementById('loginError').style.display = 'none';
-    showMainContent();
-    loadData();
+    user = { username };
+    localStorage.setItem('user', JSON.stringify(user));
+    showMain();
+    loadPosts();
+    loadGroups();
   }
 
-  // SIGNUP
-  function toggleSignup() {
-    document.getElementById('loginForm').style.display = 
-      document.getElementById('loginForm').style.display === 'none' ? 'block' : 'none';
-    document.getElementById('signupForm').style.display = 
-      document.getElementById('signupForm').style.display === 'none' ? 'block' : 'none';
-  }
-
-  async function handleSignup() {
-    const username = document.getElementById('signupUsername').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value.trim();
-
-    if (!username || !email || !password) {
-      showAlert('الرجاء ملء جميع الحقول', 'danger');
-      return;
-    }
-
-    currentUser = { username, email, bio: '', phone: '' };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    showMainContent();
-    loadData();
-  }
-
-  // LOGOUT
-  function handleLogout() {
-    if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-      localStorage.removeItem('currentUser');
-      currentUser = null;
-      location.reload();
-    }
-  }
-
-  // SHOW MAIN
-  function showMainContent() {
+  function showMain() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('mainContent').classList.add('active');
-    document.getElementById('profileUsername').value = currentUser.username;
-    document.getElementById('profileEmail').value = currentUser.email;
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('user');
+    location.reload();
   }
 
   // SWITCH SECTION
-  function switchSection(section) {
+  function switchSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(section + 'Section').classList.add('active');
+    document.getElementById(id + 'Section').classList.add('active');
   }
 
-  // FEED (PUBLIC)
-  async function loadFeed() {
-    try {
-      const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false }).limit(50);
-      if (error) throw error;
-      
-      allPosts = data || [];
-      displayFeed(allPosts);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function displayFeed(posts) {
-    const feedList = document.getElementById('feedList');
-    if (!posts || posts.length === 0) {
-      feedList.innerHTML = '<div class="card"><div class="empty-state"><div class="empty-state-icon">📭</div><p>لا توجد منشورات حتى الآن</p></div></div>';
-      return;
-    }
-
-    feedList.innerHTML = posts.map(post => `
-      <div class="card">
-        <div class="post-author">
-          <div class="post-avatar">${post.author?.charAt(0).toUpperCase() || '👤'}</div>
-          <div>
-            <strong>${post.author || 'مستخدم'}</strong>
-            <div style="font-size: 12px; color: #95a5a6;">${formatDate(post.created_at)}</div>
-          </div>
-        </div>
-        <div class="post-title">${post.title}</div>
-        <div class="post-content">${post.content}</div>
-        <div class="post-stats">
-          <span>❤️ 0 إعجاب</span>
-          <span>💬 0 تعليق</span>
-          <span>🏷️ ${post.type || 'عام'}</span>
-        </div>
-        <div class="post-actions">
-          <button class="btn btn-primary btn-small" onclick="showAlert('تم إضافة إعجاب! ❤️', 'success')">👍 إعجاب</button>
-          <button class="btn btn-secondary btn-small" onclick="showComment()">💬 تعليق</button>
-          <button class="btn btn-secondary btn-small" onclick="showAlert('تم مشاركة المنشور! 🔗', 'success')">🔗 مشاركة</button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function filterFeed() {
-    const search = document.getElementById('feedSearch').value.toLowerCase();
-    const filter = document.getElementById('feedFilter').value;
-
-    let filtered = allPosts.filter(p => 
-      p.title.toLowerCase().includes(search) || 
-      p.content.toLowerCase().includes(search)
-    );
-
-    if (filter) {
-      filtered = filtered.filter(p => p.type === filter);
-    }
-
-    displayFeed(filtered);
+  // ALERT
+  function showAlert(msg, type = 'success') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.className = `alert show alert-${type}`;
+    setTimeout(() => box.classList.remove('show'), 3000);
   }
 
   // POSTS
@@ -1275,296 +480,106 @@
     e.preventDefault();
     const title = document.getElementById('postTitle').value;
     const content = document.getElementById('postContent').value;
-    const type = document.getElementById('postType').value;
-    const category = document.getElementById('postCategory').value;
 
-    try {
-      const { error } = await db.from('posts').insert([{
-        title,
-        content,
-        type,
-        category,
-        author: currentUser.username,
-        likes: 0,
-        comments_count: 0,
-        created_at: new Date().toISOString()
-      }]);
+    const { error } = await db.from('posts').insert([{
+      title, content, author: user.username, created_at: new Date()
+    }]);
 
-      if (error) throw error;
-      showAlert('✅ تم نشر المنشور بنجاح', 'success');
-      e.target.reset();
-      loadPosts();
-      loadFeed();
-    } catch (err) {
-      showAlert('❌ خطأ: ' + err.message, 'danger');
+    if (error) {
+      showAlert(error.message, 'danger');
+      return;
     }
+
+    showAlert('✅ تم النشر');
+    e.target.reset();
+    loadPosts();
   }
 
   async function loadPosts() {
-    try {
-      const { data, error } = await db.from('posts')
-        .select('*')
-        .eq('author', currentUser.username)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
 
-      const postsList = document.getElementById('postsList');
-      document.getElementById('postCount').textContent = data?.length || 0;
-
-      if (!data || data.length === 0) {
-        postsList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>لم تنشر أي منشورات بعد</p></div>';
-        return;
-      }
-
-      postsList.innerHTML = data.map(post => `
-        <div class="post-item">
-          <div class="post-header">
-            <div>
-              <div class="post-title">${post.title}</div>
-              <div class="post-meta">${formatDate(post.created_at)} • ${post.category}</div>
-            </div>
-            <button class="btn btn-danger btn-small" onclick="deletePost(${post.id})">🗑️</button>
-          </div>
-          <div class="post-content">${post.content.substring(0, 200)}...</div>
-        </div>
-      `).join('');
-    } catch (err) {
-      console.error(err);
+    const list = document.getElementById('postsList');
+    if (!data || !data.length) {
+      list.innerHTML = '<div class="empty-state">📭 لا توجد منشورات</div>';
+      return;
     }
-  }
 
-  async function deletePost(id) {
-    if (confirm('هل تريد حذف هذا المنشور؟')) {
-      await db.from('posts').delete().eq('id', id);
-      showAlert('✅ تم حذف المنشور', 'success');
-      loadPosts();
-      loadFeed();
-    }
+    list.innerHTML = data.map(p => `
+      <div class="post-item">
+        <div class="post-title">${p.title}</div>
+        <div class="post-meta">👤 ${p.author} | ${new Date(p.created_at).toLocaleDateString('ar')}</div>
+        <div class="post-content">${p.content}</div>
+      </div>
+    `).join('');
   }
 
   // GROUPS
   async function saveGroup(e) {
     e.preventDefault();
     const name = document.getElementById('groupName').value;
-    const description = document.getElementById('groupDesc').value;
-    const type = document.getElementById('groupType').value;
-    const category = document.getElementById('groupCategory').value;
+    const desc = document.getElementById('groupDesc').value;
 
-    try {
-      const { error } = await db.from('groups').insert([{
-        name,
-        description,
-        type,
-        category,
-        owner: currentUser.username,
-        members: [currentUser.username],
-        member_count: 1,
-        created_at: new Date().toISOString()
-      }]);
+    const { error } = await db.from('groups').insert([{
+      name, description: desc, owner: user.username, created_at: new Date()
+    }]);
 
-      if (error) throw error;
-      showAlert('✅ تم إنشاء المجموعة بنجاح', 'success');
-      e.target.reset();
-      loadGroups();
-    } catch (err) {
-      showAlert('❌ خطأ: ' + err.message, 'danger');
+    if (error) {
+      showAlert(error.message, 'danger');
+      return;
     }
+
+    showAlert('✅ تم الإنشاء');
+    e.target.reset();
+    loadGroups();
   }
 
   async function loadGroups() {
-    try {
-      const { data, error } = await db.from('groups').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
+    const { data } = await db.from('groups').select('*').order('created_at', { ascending: false });
 
-      allGroups = data || [];
-      document.getElementById('groupCount').textContent = allGroups.length;
-      displayGroups(allGroups);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function displayGroups(groups) {
-    const groupsList = document.getElementById('groupsList');
-    if (!groups || groups.length === 0) {
-      groupsList.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">👥</div><p>لا توجد مجموعات حتى الآن</p></div>';
+    const list = document.getElementById('groupsList');
+    if (!data || !data.length) {
+      list.innerHTML = '<div class="empty-state">👥 لا توجد مجموعات</div>';
       return;
     }
 
-    groupsList.innerHTML = groups.map(group => `
-      <div class="group-card" onclick="openGroup('${group.id}', '${group.name}')">
-        <div class="group-name">${group.name}</div>
-        <div class="group-info">${group.description}</div>
-        <div class="group-info">📊 ${group.member_count || 1} عضو</div>
-        <div class="group-badge">${group.type === 'public' ? '🔓 عام' : group.type === 'private' ? '🔒 خاص' : '💼 تجاري'}</div>
+    list.innerHTML = data.map(g => `
+      <div class="group-card">
+        <div class="group-name">${g.name}</div>
+        <div class="group-info">${g.description}</div>
+        <div class="group-info">👤 ${g.owner}</div>
       </div>
     `).join('');
-  }
-
-  function filterGroups() {
-    const search = document.getElementById('groupSearch').value.toLowerCase();
-    const typeFilter = document.getElementById('groupTypeFilter').value;
-
-    let filtered = allGroups.filter(g => g.name.toLowerCase().includes(search));
-    if (typeFilter) filtered = filtered.filter(g => g.type === typeFilter);
-
-    displayGroups(filtered);
-  }
-
-  function openGroup(id, name) {
-    document.getElementById('modalGroupName').textContent = name;
-    document.getElementById('groupModal').classList.add('active');
-    showAlert('🔄 تحميل المجموعة...', 'info');
-  }
-
-  function closeGroupModal() {
-    document.getElementById('groupModal').classList.remove('active');
-  }
-
-  // PRODUCTS
-  async function saveProduct(e) {
-    e.preventDefault();
-    const name = document.getElementById('productName').value;
-    const price = parseFloat(document.getElementById('productPrice').value);
-    const description = document.getElementById('productDesc').value;
-    const category = document.getElementById('productCategory').value;
-    const quantity = parseInt(document.getElementById('productQuantity').value);
-
-    try {
-      const { error } = await db.from('products').insert([{
-        name,
-        price,
-        description,
-        category,
-        quantity,
-        seller: currentUser.username,
-        created_at: new Date().toISOString()
-      }]);
-
-      if (error) throw error;
-      showAlert('✅ تم إضافة المنتج بنجاح', 'success');
-      e.target.reset();
-      loadProducts();
-    } catch (err) {
-      showAlert('❌ خطأ: ' + err.message, 'danger');
-    }
-  }
-
-  async function loadProducts() {
-    try {
-      const { data, error } = await db.from('products').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-
-      allProducts = data || [];
-      document.getElementById('productCount').textContent = allProducts.length;
-      displayProducts(allProducts);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function displayProducts(products) {
-    const productsList = document.getElementById('productsList');
-    if (!products || products.length === 0) {
-      productsList.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-state-icon">📭</div><p>لا توجد منتجات حتى الآن</p></div>';
-      return;
-    }
-
-    productsList.innerHTML = products.map(product => `
-      <div class="product-card">
-        <div class="product-image">📦</div>
-        <div class="product-info">
-          <div class="product-name">${product.name}</div>
-          <div class="product-price">${product.price} ر.س</div>
-          <div class="product-desc">${product.description?.substring(0, 50) || 'بدون وصف'}...</div>
-          <div style="font-size: 12px; color: #95a5a6; margin-bottom: 10px;">👤 ${product.seller}</div>
-          <button class="btn btn-primary" onclick="showAlert('تم إضافة المنتج للسلة! 🛒', 'success')" style="width: 100%;">🛒 شراء</button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function filterProducts() {
-    const search = document.getElementById('productSearch').value.toLowerCase();
-    const category = document.getElementById('productCategoryFilter').value;
-
-    let filtered = allProducts.filter(p => p.name.toLowerCase().includes(search));
-    if (category) filtered = filtered.filter(p => p.category === category);
-
-    displayProducts(filtered);
   }
 
   // MESSAGES
-  function switchMessagesTab(tab) {
-    document.querySelectorAll('#messagesSection .tab-button').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-
-    if (tab === 'conversations') {
-      document.getElementById('conversationsTab').style.display = 'block';
-      document.getElementById('newTab').style.display = 'none';
-    } else {
-      document.getElementById('conversationsTab').style.display = 'none';
-      document.getElementById('newTab').style.display = 'block';
-    }
-  }
-
   async function sendMessage(e) {
     e.preventDefault();
     const to = document.getElementById('messageTo').value;
-    const content = document.getElementById('messageContent').value;
+    const text = document.getElementById('messageText').value;
 
-    try {
-      const { error } = await db.from('messages').insert([{
-        from: currentUser.username,
-        to,
-        content,
-        created_at: new Date().toISOString(),
-        read: false
-      }]);
+    const { error } = await db.from('messages').insert([{
+      from: user.username, to, content: text, created_at: new Date()
+    }]);
 
-      if (error) throw error;
-      showAlert('✅ تم إرسال الرسالة بنجاح', 'success');
-      e.target.reset();
-    } catch (err) {
-      showAlert('❌ خطأ: ' + err.message, 'danger');
+    if (error) {
+      showAlert(error.message, 'danger');
+      return;
     }
+
+    showAlert('✅ تم الإرسال');
+    e.target.reset();
   }
 
-  function filterConversations() {
-    showAlert('🔄 البحث في المحادثات...', 'info');
-  }
-
-  // PROFILE
-  function updateProfile() {
-    const bio = document.getElementById('profileBio').value;
-    const phone = document.getElementById('profilePhone').value;
-
-    currentUser.bio = bio;
-    currentUser.phone = phone;
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    showAlert('✅ تم تحديث الملف الشخصي', 'success');
-  }
-
-  function updateUserStats() {
-    const userPosts = allPosts.filter(p => p.author === currentUser.username).length;
-    const userGroups = allGroups.filter(g => g.owner === currentUser.username).length;
-    const userProducts = allProducts.filter(p => p.seller === currentUser.username).length;
-
-    document.getElementById('userPostsCount').textContent = userPosts;
-    document.getElementById('userGroupsCount').textContent = userGroups;
-    document.getElementById('userProductsCount').textContent = userProducts;
-  }
-
-  // HELPERS
-  function formatDate(date) {
-    return new Date(date).toLocaleDateString('ar-EG');
-  }
-
-  function showComment() {
-    const text = prompt('اكتب تعليقك:');
-    if (text) showAlert('✅ تم إضافة التعليق', 'success');
-  }
+  // INIT
+  window.addEventListener('load', () => {
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      user = JSON.parse(stored);
+      showMain();
+      loadPosts();
+      loadGroups();
+    }
+  });
 </script>
 
 </body>
