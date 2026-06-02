@@ -55,82 +55,125 @@ th{background:#3498db;color:white}
 <tbody id="postsTable"><tr><td colspan="3" style="text-align:center;padding:20px">اضغط دخول أولاً</td></tr></tbody>
 </table>
 </div></div>
-  <script>
+<script>
 const PASSWORD = 'mysecret1999';
-// غير السطرين دول بروابط Supabase بتوعك
 const SUPABASE_URL = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
 
 let supabase = null;
+let editingId = null;
 
 function checkPass() {
     let pass = document.getElementById('passInput').value.trim();
     if(pass === PASSWORD) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
-        initSupabase(); // نشغل Supabase بعد ما ندخل بس
+        initSupabase();
     } else {
         document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('passInput').value = '';
     }
 }
 
 function initSupabase() {
-    try {
-        // نحمل Supabase بس بعد الباسورد
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-        script.onload = () => {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            loadPosts();
-            setupForm();
-        };
-        script.onerror = () => {
-            document.getElementById('statusMsg').innerText = 'خطأ في تحميل Supabase. اتأكد من النت';
-        };
-        document.head.appendChild(script);
-    } catch(e) {
-        document.getElementById('statusMsg').innerText = 'خطأ: ' + e.message;
-    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.onload = () => {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        loadPosts();
+        setupForm();
+        setupImageUpload();
+    };
+    document.head.appendChild(script);
 }
 
 async function loadPosts() {
-    if(!supabase) return;
-    try {
-        const {data, error} = await supabase.from('posts').select('*').order('created_at', {ascending:false});
-        if(error) throw error;
-        
-        const tbody = document.getElementById('postsTable');
-        if(!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px">لا توجد بوستات بعد</td></tr>';
-            return;
-        }
-        tbody.innerHTML = data.map(p => `
-            <tr>
-                <td>${p.title}</td>
-                <td>${p.published? '✅ منشور' : '📝 مسودة'}</td>
-                <td><button onclick="alert('التعديل شغال')">تعديل</button></td>
-            </tr>
-        `).join('');
-    } catch(e) {
-        document.getElementById('statusMsg').innerText = 'خطأ في جلب البوستات: ' + e.message;
+    const {data, error} = await supabase.from('posts').select('*').order('created_at', {ascending:false});
+    if(error) return document.getElementById('statusMsg').innerText = 'خطأ: ' + error.message;
+
+    const tbody = document.getElementById('postsTable');
+    if(!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px">لا توجد بوستات بعد</td></tr>';
+        return;
     }
+    tbody.innerHTML = data.map(p => `
+        <tr>
+            <td>${p.title}</td>
+            <td>${p.published? '✅ منشور' : '📝 مسودة'}</td>
+            <td>
+                <button onclick='editPost(${JSON.stringify(p)})' style="background:#f39c12">تعديل</button>
+                <button onclick="deletePost('${p.id}')" style="background:#e74c3c">حذف</button>
+            </td>
+        </tr>
+    `).join('');
 }
 
 function setupForm() {
     document.getElementById('postForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert('تمام! الباسورد + Supabase شغالين. نكمل كود الإضافة بعدين');
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        const published = document.getElementById('published').checked;
+        const imageUrl = document.getElementById('imageUrl').value;
+
+        if(editingId) {
+            // تعديل
+            await supabase.from('posts').update({title, content, published, image_url:imageUrl}).eq('id', editingId);
+            alert('✅ تم التعديل');
+        } else {
+            // إضافة جديد
+            await supabase.from('posts').insert([{title, content, published, image_url:imageUrl}]);
+            alert('✅ تم النشر');
+        }
+        resetForm();
+        loadPosts();
     });
 }
 
-function resetForm() {
-    document.getElementById('postForm').reset();
-    document.getElementById('imagePreview').style.display = 'none';
+function setupImageUpload() {
+    document.getElementById('imageFile').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const fileName = Date.now() + '-' + file.name;
+        const {data, error} = await supabase.storage.from('images').upload(fileName, file);
+        if(error) return alert('خطأ رفع الصورة');
+        const url = SUPABASE_URL + '/storage/v1/object/public/images/' + data.path;
+        document.getElementById('imageUrl').value = url;
+        document.getElementById('imagePreview').src = url;
+        document.getElementById('imagePreview').style.display = 'block';
+    });
 }
 
-document.getElementById('passInput').addEventListener('keypress', function(e) {
-    if(e.key === 'Enter') checkPass();
-});
+function editPost(post) {
+    editingId = post.id;
+    document.getElementById('formTitle').innerText = 'تعديل البوست';
+    document.getElementById('postId').value = post.id;
+    document.getElementById('title').value = post.title;
+    document.getElementById('content').value = post.content;
+    document.getElementById('published').checked = post.published;
+    document.getElementById('imageUrl').value = post.image_url || '';
+    if(post.image_url) {
+        document.getElementById('imagePreview').src = post.image_url;
+        document.getElementById('imagePreview').style.display = 'block';
+    }
+    window.scrollTo(0,0);
+}
+
+async function deletePost(id) {
+    if(confirm('متأكد عايز تحذف البوست ده؟')) {
+        await supabase.from('posts').delete().eq('id', id);
+        alert('🗑️ تم الحذف');
+        loadPosts();
+    }
+}
+
+function resetForm() {
+    editingId = null;
+    document.getElementById('formTitle').innerText = 'إضافة بوست جديد';
+    document.getElementById('postForm').reset();
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('imageUrl').value = '';
+}
 </script>
 </body>
 </html>
