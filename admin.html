@@ -2,29 +2,46 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>لوحة التحكم</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم الكاملة</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    body{font-family:tahoma;background:#0d0d0d;color:#eee;padding:20px;max-width:900px;margin:auto}
-    input,textarea,button,select{padding:8px;margin:5px;border-radius:6px;border:1px solid #333;background:#1a1a1a;color:#eee}
-    button{cursor:pointer;background:#0d6efd;border:none}
+    body{font-family:tahoma;background:#0d0d0d;color:#eee;padding:15px;margin:0}
+    h1,h2{text-align:center}
+    input,textarea,button,select{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #333;background:#1a1a1a;color:#eee;box-sizing:border-box}
+    button{cursor:pointer;background:#0d6efd;border:none;font-weight:bold}
     button.danger{background:#dc3545}
-    table{width:100%;border-collapse:collapse;margin-top:20px}
-    th,td{border:1px solid #333;padding:10px;text-align:right}
+    button.success{background:#198754}
+    button.warning{background:#ffc107;color:#000}
+    form{max-width:600px;margin:20px auto;padding:15px;border:1px solid #333;border-radius:8px;background:#141414}
+    .topbar{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+    .topbar input{flex:2}
+    .topbar select{flex:1}
+    .topbar button{flex:0.5}
+    table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px}
+    th,td{border:1px solid #333;padding:8px;text-align:center}
     th{background:#1a1a1a}
-    .topbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+    td:last-child{white-space:nowrap}
+    a{color:#0d6efd;display:block;text-align:center;margin:10px}
+    .btns{display:flex;gap:5px;justify-content:center}
+    .btns button{width:auto;padding:5px 10px;font-size:12px}
+    @media(max-width:600px){table{font-size:12px} th,td{padding:5px} .btns{flex-direction:column}}
   </style>
 </head>
 <body>
-  <h1>📊 لوحة التحكم</h1>
+  <h1>📊 لوحة التحكم الكاملة</h1>
   <a href="index.html">← الرجوع للموقع</a>
 
-  <h2>نشر بوست جديد</h2>
+  <h2 id="formTitle">نشر بوست جديد</h2>
   <form id="postForm">
+    <input type="hidden" id="postId">
     <input type="text" id="title" placeholder="العنوان" required>
-    <textarea id="content" placeholder="المحتوى" rows="3" required></textarea>
-    <label><input type="checkbox" id="published"> نشر الآن</label>
-    <button type="submit">إضافة</button>
+    <textarea id="content" placeholder="المحتوى" rows="4" required></textarea>
+    <label style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="published" style="width:auto"> نشر الآن
+    </label>
+    <button type="submit" id="saveBtn">إضافة البوست</button>
+    <button type="button" id="cancelBtn" style="display:none;background:#6c757d">إلغاء التعديل</button>
   </form>
 
   <h2>إدارة البوستات</h2>
@@ -38,26 +55,30 @@
     <button onclick="loadPosts()">تحديث</button>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>العنوان</th>
-        <th>الحالة</th>
-        <th>التاريخ</th>
-        <th>تحكم</th>
-      </tr>
-    </thead>
-    <tbody id="postsTable">
-      <tr><td colspan="4">جاري التحميل...</td></tr>
-    </tbody>
-  </table>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>العنوان</th>
+          <th>الحالة</th>
+          <th>التاريخ</th>
+          <th>تحكم</th>
+        </tr>
+      </thead>
+      <tbody id="postsTable">
+        <tr><td colspan="4">جاري التحميل...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <script>
-    // ===== حط نفس بياناتك هنا برضو =====
+    // ===== حط بياناتك هنا =====
     const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
     const db = supabase.createClient(supabaseUrl, supabaseKey)
-    // ==================================
+    // ==========================
+
+    let editMode = false
 
     async function loadPosts(){
       const tbody = document.getElementById('postsTable')
@@ -80,28 +101,65 @@
           <td>${p.published ? '✅ منشور' : '📝 مسودة'}</td>
           <td>${new Date(p.created_at).toLocaleDateString('ar-EG')}</td>
           <td>
-            <button class="danger" onclick="deletePost(${p.id})">حذف</button>
+            <div class="btns">
+              <button class="warning" onclick="editPost(${p.id}, '${p.title.replace(/'/g,"\\'")}', '${p.content.replace(/'/g,"\\'")}', ${p.published})">تعديل</button>
+              <button class="danger" onclick="deletePost(${p.id})">حذف</button>
+            </div>
           </td>
         </tr>
       `).join('')
     }
 
+    function editPost(id, title, content, published){
+      document.getElementById('postId').value = id
+      document.getElementById('title').value = title
+      document.getElementById('content').value = content
+      document.getElementById('published').checked = published
+      document.getElementById('formTitle').textContent = '✏️ تعديل البوست'
+      document.getElementById('saveBtn').textContent = 'حفظ التعديل'
+      document.getElementById('saveBtn').className = 'success'
+      document.getElementById('cancelBtn').style.display = 'block'
+      window.scrollTo(0, 0)
+      editMode = true
+    }
+
+    function cancelEdit(){
+      document.getElementById('postForm').reset()
+      document.getElementById('postId').value = ''
+      document.getElementById('formTitle').textContent = 'نشر بوست جديد'
+      document.getElementById('saveBtn').textContent = 'إضافة البوست'
+      document.getElementById('saveBtn').className = ''
+      document.getElementById('cancelBtn').style.display = 'none'
+      editMode = false
+    }
+
     async function deletePost(id){
       if(!confirm('متأكد عايز تحذف البوست؟')) return
-      await db.from('posts').delete().eq('id', id)
+      const {error} = await db.from('posts').delete().eq('id', id)
+      if(error) alert('خطأ: ' + error.message)
       loadPosts()
     }
 
     document.getElementById('postForm').addEventListener('submit', async (e)=>{
       e.preventDefault()
+      const id = document.getElementById('postId').value
       const title = document.getElementById('title').value
       const content = document.getElementById('content').value
       const published = document.getElementById('published').checked
-      await db.from('posts').insert([{title, content, published}])
-      e.target.reset()
+      
+      if(editMode){
+        // تعديل
+        await db.from('posts').update({title, content, published}).eq('id', id)
+        cancelEdit()
+      } else {
+        // نشر جديد
+        await db.from('posts').insert([{title, content, published}])
+        e.target.reset()
+      }
       loadPosts()
     })
 
+    document.getElementById('cancelBtn').addEventListener('click', cancelEdit)
     document.getElementById('search').addEventListener('input', loadPosts)
     document.getElementById('filter').addEventListener('change', loadPosts)
 
