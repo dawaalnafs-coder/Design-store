@@ -52,7 +52,7 @@ th{background:#3498db;color:white}
 <div id="statusMsg" style="color:#e74c3c;margin:10px 0"></div>
 <table>
 <thead><tr><th>العنوان</th><th>الحالة</th><th>إجراءات</th></tr><th>الصورة</th></thead>
-<tbody id="postsTable"><tr><td colspan="3" style="text-align:center;padding:20px">اضغط دخول أولاً</td></tr></tbody>
+<tbody id="postsTable"></tbody>
 </table>
 </div></div>
 <script>
@@ -68,7 +68,9 @@ function checkPass() {
     if(pass === PASSWORD) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
-        initSupabase();
+       posts = JSON.parse(localStorage.getItem('posts') || '[]');
+renderPosts();
+      initSupabase();
     } else {
         document.getElementById('errorMsg').style.display = 'block';
         document.getElementById('passInput').value = '';
@@ -97,37 +99,30 @@ async function loadPosts() {
         return;
     }
   function renderPosts() {
-  const tbody = document.querySelector('#postsTable tbody');
+  const tbody = document.getElementById('postsTable');
   tbody.innerHTML = '';
   
   if(posts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3">لا يوجد بوستات بعد. انشر أول بوست</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">لا يوجد بوستات بعد</td></tr>';
     return;
   }
 
-  posts.forEach(post => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${post.title}</td>
-      <td>${post.published ? 'منشور' : 'مسودة'}</td>
-      <td>
-        <button class="btn edit" onclick="editPost(${post.id})">تعديل</button>
-        <button class="btn delete" onclick="deletePost(${post.id})">حذف</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-  }
-    tbody.innerHTML = data.map(p => `
-        <tr>
-            <td>${p.title}</td>
-            <td>${p.published? '✅ منشور' : '📝 مسودة'}</td>
-            <td>
-                <button onclick='editPost(${JSON.stringify(p)})' style="background:#f39c12">تعديل</button>
-                <button onclick="deletePost('${p.id}')" style="background:#e74c3c">حذف</button>
-            </td>
-        </tr>
-    `).join('');
+  for(let i = 0; i < posts.length; i++) {
+ let post = posts[i];
+ tbody.innerHTML += '<tr>' +
+ '<td>' + post.title + '</td>' +
+ '<td>' + (post.published? 'مسودة' : 'منشور') + '</td>' +
+ '<td>' + (post.image? '<img src="'+post.image+'" width="50">' : '-') + '</td>' +
+ '<td>' +
+ '<button onclick="editPost('+post.id+')">تعديل</button> ' +
+ '<button onclick="deletePost('+post.id+')">حذف</button>' +
+ '</td>' +
+ '</tr>';
+ }
+ } // ده قفل دالة renderPosts
+
+ function setupForm() {
+}
 }
 
 function setupForm() {
