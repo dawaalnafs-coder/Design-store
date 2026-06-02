@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    body{font-family:tahoma;background:#0d0d0d;color:#eee;padding:20px;max-width:900px;margin:auto}
+    input,textarea,button,select{padding:8px;margin:5px;border-radius:6px;border:1px solid #333;background:#1a1a1a;color:#eee}
+    button{cursor:pointer;background:#0d6efd;border:none}
+    button.danger{background:#dc3545}
+    table{width:100%;border-collapse:collapse;margin-top:20px}
+    th,td{border:1px solid #333;padding:10px;text-align:right}
+    th{background:#1a1a1a}
+    .topbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  </style>
+</head>
+<body>
+  <h1>📊 لوحة التحكم</h1>
+  <a href="index.html">← الرجوع للموقع</a>
+
+  <h2>نشر بوست جديد</h2>
+  <form id="postForm">
+    <input type="text" id="title" placeholder="العنوان" required>
+    <textarea id="content" placeholder="المحتوى" rows="3" required></textarea>
+    <label><input type="checkbox" id="published"> نشر الآن</label>
+    <button type="submit">إضافة</button>
+  </form>
+
+  <h2>إدارة البوستات</h2>
+  <div class="topbar">
+    <input type="text" id="search" placeholder="🔍 ابحث في العنوان...">
+    <select id="filter">
+      <option value="all">الكل</option>
+      <option value="true">منشورة</option>
+      <option value="false">مسودة</option>
+    </select>
+    <button onclick="loadPosts()">تحديث</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>العنوان</th>
+        <th>الحالة</th>
+        <th>التاريخ</th>
+        <th>تحكم</th>
+      </tr>
+    </thead>
+    <tbody id="postsTable">
+      <tr><td colspan="4">جاري التحميل...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    // ===== حط نفس بياناتك هنا برضو =====
+    const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
+    const db = supabase.createClient(supabaseUrl, supabaseKey)
+    // ==================================
+
+    async function loadPosts(){
+      const tbody = document.getElementById('postsTable')
+      const search = document.getElementById('search').value
+      const filter = document.getElementById('filter').value
+      
+      let query = db.from('posts').select('*').order('created_at', {ascending:false})
+      
+      if(search) query = query.ilike('title', `%${search}%`)
+      if(filter !== 'all') query = query.eq('published', filter === 'true')
+      
+      const { data, error } = await query
+      if(error){ tbody.innerHTML = `<tr><td colspan="4">خطأ: ${error.message}</td></tr>`; return }
+      
+      if(!data.length){ tbody.innerHTML = `<tr><td colspan="4">مفيش بوستات</td></tr>`; return }
+      
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td>${p.title}</td>
+          <td>${p.published ? '✅ منشور' : '📝 مسودة'}</td>
+          <td>${new Date(p.created_at).toLocaleDateString('ar-EG')}</td>
+          <td>
+            <button class="danger" onclick="deletePost(${p.id})">حذف</button>
+          </td>
+        </tr>
+      `).join('')
+    }
+
+    async function deletePost(id){
+      if(!confirm('متأكد عايز تحذف البوست؟')) return
+      await db.from('posts').delete().eq('id', id)
+      loadPosts()
+    }
+
+    document.getElementById('postForm').addEventListener('submit', async (e)=>{
+      e.preventDefault()
+      const title = document.getElementById('title').value
+      const content = document.getElementById('content').value
+      const published = document.getElementById('published').checked
+      await db.from('posts').insert([{title, content, published}])
+      e.target.reset()
+      loadPosts()
+    })
+
+    document.getElementById('search').addEventListener('input', loadPosts)
+    document.getElementById('filter').addEventListener('change', loadPosts)
+
+    loadPosts()
+  </script>
+</body>
+</html>
