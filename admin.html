@@ -197,7 +197,6 @@ showMsg('تم النشر بنجاح ✓', 'success')
 document.getElementById('title').value = ''
 document.getElementById('content').value = ''
 document.getElementById('image_url').value = ''
-loadPosts()
 }
 
 function startEdit(id){
@@ -225,7 +224,6 @@ return
 
 showMsg('تم حفظ التعديل ✓', 'success')
 editId = null
-loadPosts()
 }
 
 async function deletePost(id){
@@ -236,7 +234,6 @@ showMsg('خطأ في الحذف', 'error')
 return
 }
 showMsg('تم الحذف ✓', 'success')
-loadPosts()
 }
 
 async function togglePublish(id, status){
@@ -246,7 +243,6 @@ showMsg('خطأ', 'error')
 return
 }
 showMsg(status? 'تم النشر في الموقع ✓' : 'تم إخفاء المنشور', 'success')
-loadPosts()
 }
 
 function filterPosts(){
@@ -262,7 +258,6 @@ return matchSearch && matchStatus
 renderPosts(filtered)
 }
 
-loadPosts()
 </script>
   window.addEventListener('DOMContentLoaded', loadPosts)
 </body>
