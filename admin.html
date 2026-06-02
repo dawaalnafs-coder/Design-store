@@ -3,82 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الكاملة</title>
+  <title>لوحة التحكم</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    body{font-family:tahoma;background:#0d0d0d;color:#eee;padding:15px;margin:0}
-    h1,h2{text-align:center}
-    input,textarea,button,select{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #333;background:#1a1a1a;color:#eee;box-sizing:border-box}
+    body{font-family:tahoma;background:#0d0d0d;color:#eee;padding:10px;margin:0}
+    h1,h2{text-align:center;font-size:18px}
+    input,textarea,button,select{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #333;background:#1a1a1a;color:#eee;box-sizing:border-box;font-size:14px}
     button{cursor:pointer;background:#0d6efd;border:none;font-weight:bold}
     button.danger{background:#dc3545}
     button.success{background:#198754}
     button.warning{background:#ffc107;color:#000}
-    form{max-width:600px;margin:20px auto;padding:15px;border:1px solid #333;border-radius:8px;background:#141414}
-    .topbar{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
-    .topbar input{flex:2}
-    .topbar select{flex:1}
-    .topbar button{flex:0.5}
-    table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px}
-    th,td{border:1px solid #333;padding:8px;text-align:center}
-    th{background:#1a1a1a}
-    td:last-child{white-space:nowrap}
-    a{color:#0d6efd;display:block;text-align:center;margin:10px}
-    .btns{display:flex;gap:5px;justify-content:center}
-    .btns button{width:auto;padding:5px 10px;font-size:12px}
-    @media(max-width:600px){table{font-size:12px} th,td{padding:5px} .btns{flex-direction:column}}
+    form{max-width:600px;margin:15px auto;padding:12px;border:1px solid #333;border-radius:8px;background:#141414}
+    .topbar{display:flex;gap:6px;flex-wrap:wrap;margin:15px 0}
+    .topbar input{flex:3;min-width:150px}
+    .topbar select{flex:1;min-width:100px}
+    .topbar button{flex:1;min-width:80px}
+    .table-wrap{overflow-x:auto;margin-top:15px;border:1px solid #333;border-radius:8px}
+    table{width:100%;border-collapse:collapse;min-width:500px;font-size:13px}
+    th,td{border:1px solid #333;padding:8px;text-align:center;white-space:nowrap}
+    th{background:#1a1a1a;font-size:12px}
+    a{color:#0d6efd;display:block;text-align:center;margin:8px;font-size:14px}
+    .btns{display:flex;gap:4px;justify-content:center}
+    .btns button{width:auto;padding:4px 8px;font-size:11px}
+    .login-box{max-width:350px;margin:100px auto;padding:20px;border:1px solid #333;border-radius:10px;background:#141414;text-align:center}
+    .hidden{display:none}
   </style>
 </head>
 <body>
-  <h1>📊 لوحة التحكم الكاملة</h1>
-  <a href="index.html">← الرجوع للموقع</a>
-
-  <h2 id="formTitle">نشر بوست جديد</h2>
-  <form id="postForm">
-    <input type="hidden" id="postId">
-    <input type="text" id="title" placeholder="العنوان" required>
-    <textarea id="content" placeholder="المحتوى" rows="4" required></textarea>
-    <label style="display:flex;align-items:center;gap:8px">
-      <input type="checkbox" id="published" style="width:auto"> نشر الآن
-    </label>
-    <button type="submit" id="saveBtn">إضافة البوست</button>
-    <button type="button" id="cancelBtn" style="display:none;background:#6c757d">إلغاء التعديل</button>
-  </form>
-
-  <h2>إدارة البوستات</h2>
-  <div class="topbar">
-    <input type="text" id="search" placeholder="🔍 ابحث في العنوان...">
-    <select id="filter">
-      <option value="all">الكل</option>
-      <option value="true">منشورة</option>
-      <option value="false">مسودة</option>
-    </select>
-    <button onclick="loadPosts()">تحديث</button>
+  <!-- شاشة تسجيل الدخول -->
+  <div id="loginBox" class="login-box">
+    <h2>🔐 دخول لوحة التحكم</h2>
+    <input type="password" id="password" placeholder="اكتب كلمة السر" autofocus>
+    <button onclick="checkPassword()">دخول</button>
+    <p id="errorMsg" style="color:#dc3545;display:none">كلمة السر غلط!</p>
   </div>
 
-  <div style="overflow-x:auto">
-    <table>
-      <thead>
-        <tr>
-          <th>العنوان</th>
-          <th>الحالة</th>
-          <th>التاريخ</th>
-          <th>تحكم</th>
-        </tr>
-      </thead>
-      <tbody id="postsTable">
-        <tr><td colspan="4">جاري التحميل...</td></tr>
-      </tbody>
-    </table>
+  <!-- لوحة التحكم - مخفية لحد ما تدخل الباسورد -->
+  <div id="adminPanel" class="hidden">
+    <h1>📊 لوحة التحكم الكاملة</h1>
+    <a href="index.html">← الرجوع للموقع</a>
+    <button onclick="logout()" style="background:#6c757d;width:auto;float:left">تسجيل خروج</button>
+
+    <h2 id="formTitle">نشر بوست جديد</h2>
+    <form id="postForm">
+      <input type="hidden" id="postId">
+      <input type="text" id="title" placeholder="العنوان" required>
+      <textarea id="content" placeholder="المحتوى" rows="3" required></textarea>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px">
+        <input type="checkbox" id="published" style="width:auto"> نشر الآن
+      </label>
+      <button type="submit" id="saveBtn">إضافة البوست</button>
+      <button type="button" id="cancelBtn" style="display:none;background:#6c757d">إلغاء التعديل</button>
+    </form>
+
+    <h2>إدارة البوستات</h2>
+    <div class="topbar">
+      <input type="text" id="search" placeholder="🔍 ابحث...">
+      <select id="filter">
+        <option value="all">الكل</option>
+        <option value="true">منشورة</option>
+        <option value="false">مسودة</option>
+      </select>
+      <button onclick="loadPosts()">تحديث</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>العنوان</th>
+            <th>الحالة</th>
+            <th>التاريخ</th>
+            <th>تحكم</th>
+          </tr>
+        </thead>
+        <tbody id="postsTable">
+          <tr><td colspan="4">جاري التحميل...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
-    // ===== حط بياناتك هنا =====
+    // ======== الإعدادات ========
     const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
-    const db = supabase.createClient(supabaseUrl, supabaseKey)
+    const ADMIN_PASSWORD = 'mysecret1999' // غير دي لكلمة سر قوية بتاعتك
     // ==========================
 
+    const db = supabase.createClient(supabaseUrl, supabaseKey)
     let editMode = false
+
+    // تشفير بسيط للباسورد
+    function checkPassword(){
+      const pass = document.getElementById('password').value
+      if(pass === ADMIN_PASSWORD){
+        localStorage.setItem('admin_logged_in', 'true')
+        showPanel()
+      } else {
+        document.getElementById('errorMsg').style.display = 'block'
+      }
+    }
+
+    function showPanel(){
+      document.getElementById('loginBox').classList.add('hidden')
+      document.getElementById('adminPanel').classList.remove('hidden')
+      loadPosts()
+    }
+
+    function logout(){
+      localStorage.removeItem('admin_logged_in')
+      location.reload()
+    }
+
+    // لو مسجل دخول قبل كده يدخل على طول
+    if(localStorage.getItem('admin_logged_in') === 'true'){
+      showPanel()
+    }
 
     async function loadPosts(){
       const tbody = document.getElementById('postsTable')
@@ -86,13 +127,11 @@
       const filter = document.getElementById('filter').value
       
       let query = db.from('posts').select('*').order('created_at', {ascending:false})
-      
       if(search) query = query.ilike('title', `%${search}%`)
       if(filter !== 'all') query = query.eq('published', filter === 'true')
       
       const { data, error } = await query
       if(error){ tbody.innerHTML = `<tr><td colspan="4">خطأ: ${error.message}</td></tr>`; return }
-      
       if(!data.length){ tbody.innerHTML = `<tr><td colspan="4">مفيش بوستات</td></tr>`; return }
       
       tbody.innerHTML = data.map(p => `
@@ -134,9 +173,8 @@
     }
 
     async function deletePost(id){
-      if(!confirm('متأكد عايز تحذف البوست؟')) return
-      const {error} = await db.from('posts').delete().eq('id', id)
-      if(error) alert('خطأ: ' + error.message)
+      if(!confirm('متأكد تحذف البوست؟')) return
+      await db.from('posts').delete().eq('id', id)
       loadPosts()
     }
 
@@ -148,11 +186,9 @@
       const published = document.getElementById('published').checked
       
       if(editMode){
-        // تعديل
         await db.from('posts').update({title, content, published}).eq('id', id)
         cancelEdit()
       } else {
-        // نشر جديد
         await db.from('posts').insert([{title, content, published}])
         e.target.reset()
       }
@@ -162,8 +198,9 @@
     document.getElementById('cancelBtn').addEventListener('click', cancelEdit)
     document.getElementById('search').addEventListener('input', loadPosts)
     document.getElementById('filter').addEventListener('change', loadPosts)
-
-    loadPosts()
+    document.getElementById('password').addEventListener('keypress', (e)=>{
+      if(e.key === 'Enter') checkPassword()
+    })
   </script>
 </body>
 </html>
