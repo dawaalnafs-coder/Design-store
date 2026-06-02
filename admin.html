@@ -92,19 +92,29 @@ setTimeout(()=>m.style.display='none', 3000)
 }
 
 async function loadPosts(){
-const {data, error} = await supabase
-.from('posts')
-.select('*')
-.order('created_at', {ascending: false})
+async function loadPosts(){
+  try {
+    document.getElementById('posts').innerHTML = 'جاري التحميل...'
 
-if(error){
-showMsg('خطأ: ' + error.message, 'error')
-return
-}
+    const {data, error} = await supabase
+    .from('posts')
+    .select('*')
+    .order('created_at', {ascending: false})
 
-allPosts = data
-updateStats()
-renderPosts(allPosts)
+    if(error){
+      showMsg('خطأ: ' + error.message, 'error')
+      document.getElementById('posts').innerHTML = 'فشل التحميل: ' + error.message
+      return
+    }
+
+    allPosts = data
+    updateStats()
+    renderPosts(allPosts)
+    
+  } catch(e) {
+    document.getElementById('posts').innerHTML = 'خطأ فادح: ' + e.message
+    console.error(e)
+  }
 }
 
 function updateStats(){
@@ -254,5 +264,6 @@ renderPosts(filtered)
 
 loadPosts()
 </script>
+  window.addEventListener('DOMContentLoaded', loadPosts)
 </body>
 </html>
