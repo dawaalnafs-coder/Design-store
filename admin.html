@@ -96,6 +96,28 @@ async function loadPosts() {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px">لا توجد بوستات بعد</td></tr>';
         return;
     }
+  function renderPosts() {
+  const tbody = document.querySelector('#postsTable tbody');
+  tbody.innerHTML = '';
+  
+  if(posts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3">لا يوجد بوستات بعد. انشر أول بوست</td></tr>';
+    return;
+  }
+
+  posts.forEach(post => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${post.title}</td>
+      <td>${post.published ? 'منشور' : 'مسودة'}</td>
+      <td>
+        <button class="btn edit" onclick="editPost(${post.id})">تعديل</button>
+        <button class="btn delete" onclick="deletePost(${post.id})">حذف</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  }
     tbody.innerHTML = data.map(p => `
         <tr>
             <td>${p.title}</td>
