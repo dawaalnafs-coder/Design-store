@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <title>مدونتي</title>
-  <script src="
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.106.2/dist/umd/supabase.min.js
-"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    body{font-family:tahoma;background:#111;color:#eee;padding:20px}
-    input,textarea,button{width:100%;padding:8px;margin:5px 0}
-    #posts div{border:1px solid #444;padding:10px;margin:10px 0;border-radius:8px}
+    body{font-family:tahoma;background:#111;color:#eee;padding:20px;max-width:600px;margin:auto}
+    input,textarea,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:none}
+    button{background:#0d6efd;color:white;cursor:pointer}
+    #posts div{border:1px solid #444;padding:12px;margin:10px 0;border-radius:8px;background:#1a1a1a}
   </style>
 </head>
 <body>
@@ -17,7 +16,7 @@ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.106.2/dist/umd/supabase.min
   
   <form id="postForm">
     <input type="text" id="title" placeholder="العنوان" required>
-    <textarea id="content" placeholder="المحتوى" required></textarea>
+    <textarea id="content" placeholder="المحتوى" rows="4" required></textarea>
     <button type="submit">نشر</button>
   </form>
 
@@ -25,20 +24,20 @@ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.106.2/dist/umd/supabase.min
   <div id="posts">جاري التحميل...</div>
 
   <script>
-    // ===== حط بياناتك هنا =====
+    // ===== انسخ اللينكين بتوعك هنا بالظبط =====
     const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey)
-    // ==========================
+    const db = supabase.createClient(supabaseUrl, supabaseKey)
+    // ===========================================
 
     async function loadPosts(){
       const postsDiv = document.getElementById('posts')
       try{
-        const { data, error } = await supabase.from('posts').select('*').order('created_at', {ascending:false})
+        const { data, error } = await db.from('posts').select('*').order('created_at', {ascending:false})
         if(error) throw error
         
         if(!data || data.length === 0){
-          postsDiv.innerHTML = 'مفيش بوستات لسه. ضيف أول بوست'
+          postsDiv.innerHTML = 'مفيش بوستات لسه. ضيف أول بوست 👇'
           return
         }
         
@@ -46,11 +45,12 @@ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.106.2/dist/umd/supabase.min
           <div>
             <h3>${p.title}</h3>
             <p>${p.content}</p>
-            <small>${new Date(p.created_at).toLocaleDateString('ar-EG')}</small>
+            <small style="color:#aaa">${new Date(p.created_at).toLocaleDateString('ar-EG')}</small>
           </div>
         `).join('')
       }catch(err){
-        postsDiv.innerHTML = 'خطأ: ' + err.message
+        postsDiv.innerHTML = 'خطأ: ' + err.message + '<br>اتأكد من اللينك والمفتاح'
+        console.error(err)
       }
     }
 
@@ -58,7 +58,7 @@ https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.106.2/dist/umd/supabase.min
       e.preventDefault()
       const title = document.getElementById('title').value
       const content = document.getElementById('content').value
-      await supabase.from('posts').insert([{title, content, published:true}])
+      await db.from('posts').insert([{title, content, published:true}])
       document.getElementById('postForm').reset()
       loadPosts()
     })
