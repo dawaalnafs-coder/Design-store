@@ -488,37 +488,6 @@ window.addEventListener('load', async () => {
   }
 });
 
-function showMain() {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('mainContent').classList.add('active');
-}
-
-async function handleLogout() {
-  await db.auth.signOut();
-  localStorage.removeItem('user');
-  location.reload();
-}
-
-// INIT - يشيك لو فيه يوزر مسجل
-window.addEventListener('load', async () => {
-  const { data: { session } = await db.auth.getSession();
-  if (session) {
-    user = session.user;
-    showMain();
-    loadPosts();
-    loadGroups();
-  }
-});
-
-  function showMain() {
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('mainContent').classList.add('active');
-  }
-
-  function handleLogout() {
-    localStorage.removeItem('user');
-    location.reload();
-  }
 
   // SWITCH SECTION
   function switchSection(id) {
