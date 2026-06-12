@@ -50,6 +50,11 @@ button.warn{background:#f39c12}
   <div id="registerForm" class="hidden">
     <input type="email" id="registerEmail" placeholder="الإيميل">
     <input type="password" id="registerPassword" placeholder="كلمة مرور قوية">
+    <select id="registerGender" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:8px 0;font-size:14px">
+  <option value="">اختر الجنس</option>
+  <option value="M">ذكر</option>
+  <option value="F">أنثى</option>
+</select>
     <button onclick="handleRegister()" style="width:100%">إنشاء حساب</button>
   </div>
   <div id="authAlert" class="alert"></div>
@@ -168,8 +173,14 @@ async function createPost() {
 }
 
 // دايرة الأفاتار M أزرق F أحمر
-function avatar(name, gender='M') {
+async function getGender(userId) {
+  const { data } = await db.from('profiles').select('gender').eq('id', userId).single();
+  return data?.gender || 'M';
+}
+
+async function avatar(name, userId) {
   let letter = name? name[0].toUpperCase() : 'U';
+  let gender = await getGender(userId);
   let color = gender === 'F'? '#e74c3c' : '#3498db';
   return `<div style="width:32px;height:32px;border-radius:50%;background:${color};color:white;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;margin-left:8px;font-size:14px">${letter}</div>`;
 }
@@ -266,15 +277,32 @@ async function addComment(postId) {
 }
 
 async function loadComments(postId) {
-  const { data } = await db.from('comments').select('*').eq('post_id', postId).order('created_at');
-  const list = document.getElementById(`list-${postId}`);
+  const { data } = await db.from('comments')
+    .select('id, content, created_at, user_id, profiles!inner(email, gender)')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true });
 
-  list.innerHTML = data.map(c => `
-    <div style="display:flex;align-items:center;margin:5px 0;padding:8px;background:#f8f9fa;border-radius:8px">
-      ${avatar(c.author)}
-      <div><b>${c.author}</b><br><small>${c.content}</small></div>
-    </div>
-  `).join('');
+  const list = document.getElementById(`list-${postId}`);
+  if(!data || data.length === 0) {
+    list.innerHTML = '<small style="color:#999">لا توجد تعليقات بعد</small>';
+    return;
+  }
+
+  let commentsHTML = '';
+  for(let c of data) {
+    let author = c.profiles?.email?.split('@')[0] || 'مجهول';
+    let avatarHTML = await avatar(author, c.user_id);
+    commentsHTML += `
+      <div style="display:flex;align-items:center;margin-bottom:8px;gap:8px">
+        ${avatarHTML}
+        <div>
+          <b>${author}</b><br>
+          <small style="color:#555">${c.content}</small>
+        </div>
+      </div>
+    `;
+  }
+  list.innerHTML = commentsHTML;
 }
 
 // رسائل التنبيه
