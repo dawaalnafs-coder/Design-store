@@ -6,334 +6,57 @@
   <title>متجري - المتجر المتكامل</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Tajawal', 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      color: #333;
-    }
-
-    /* NAVBAR */
-    .navbar {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 15px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .navbar-brand {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .navbar-menu {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      list-style: none;
-    }
-
-    .navbar-menu a, .navbar-menu button {
-      color: white;
-      text-decoration: none;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 6px;
-      transition: all 0.3s;
-      border: none;
-      background: transparent;
-      font-size: 13px;
-    }
-
-    .navbar-menu a:hover, .navbar-menu button:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* LOGIN PAGE */
-    .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 20px;
-    }
-
-    .login-card {
-      background: white;
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      text-align: center;
-      max-width: 400px;
-      width: 100%;
-    }
-
-    .login-card h1 {
-      color: #2c3e50;
-      margin-bottom: 10px;
-      font-size: 28px;
-    }
-
-    .login-card p {
-      color: #7f8c8d;
-      margin-bottom: 20px;
-    }
-
-    .login-input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 2px solid #ecf0f1;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .login-input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    .login-btn {
-      width: 100%;
-      padding: 12px;
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .login-btn:hover {
-      background: #764ba2;
-    }
-
-    /* MAIN LAYOUT */
-    .main-content {
-      display: none;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .main-content.active {
-      display: block;
-    }
-
-    /* SECTIONS */
-    .section {
-      display: none;
-    }
-
-    .section.active {
-      display: block;
-      animation: fadeIn 0.3s;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* CARDS */
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .card-header {
-      font-size: 16px;
-      font-weight: bold;
-      color: #2c3e50;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #667eea;
-    }
-
-    /* FORM STYLES */
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: #2c3e50;
-      font-weight: 600;
-      font-size: 13px;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
-      padding: 8px;
-      border: 2px solid #ecf0f1;
-      border-radius: 6px;
-      font-size: 13px;
-      font-family: inherit;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 70px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* BUTTONS */
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn-primary {
-      background: #667eea;
-      color: white;
-      width: 100%;
-    }
-
-    .btn-primary:hover {
-      background: #5568d3;
-    }
-
-    .btn-secondary {
-      background: #95a5a6;
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      background: #7f8c8d;
-    }
-
-    .btn-small {
-      padding: 5px 10px;
-      font-size: 12px;
-    }
-
-    /* POSTS */
-    .post-item {
-      background: #f8f9fa;
-      border-left: 3px solid #667eea;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 6px;
-    }
-
-    .post-title {
-      font-weight: bold;
-      color: #2c3e50;
-      margin-bottom: 5px;
-    }
-
-    .post-meta {
-      color: #95a5a6;
-      font-size: 11px;
-    }
-
-    .post-content {
-      color: #555;
-      font-size: 13px;
-      margin: 8px 0;
-    }
-
-    /* GROUPS */
-    .group-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      cursor: pointer;
-    }
-
-    .group-name {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .group-info {
-      font-size: 12px;
-      opacity: 0.9;
-    }
-
-    /* ALERT */
-    .alert {
-      padding: 12px 15px;
-      border-radius: 6px;
-      margin-bottom: 15px;
-      display: none;
-    }
-
-    .alert.show {
-      display: block;
-    }
-
-    .alert-success {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .alert-danger {
-      background: #f8d7da;
-      color: #721c24;
-    }
-
-    /* EMPTY STATE */
-    .empty-state {
-      text-align: center;
-      padding: 30px 20px;
-      color: #95a5a6;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      .navbar-menu {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
+    /* نفس الاستايل بتاعك... سيبته زي ما هو */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Tajawal', 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
+    .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); position: sticky; top: 0; z-index: 100; }
+    .navbar-brand { font-size: 24px; font-weight: bold; }
+    .navbar-menu { display: flex; gap: 15px; align-items: center; list-style: none; }
+    .navbar-menu a, .navbar-menu button { color: white; text-decoration: none; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; border: none; background: transparent; font-size: 13px; }
+    .navbar-menu a:hover, .navbar-menu button:hover { background: rgba(255, 255, 255, 0.2); }
+    .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
+    .login-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); text-align: center; max-width: 400px; width: 100%; }
+    .login-card h1 { color: #2c3e50; margin-bottom: 10px; font-size: 28px; }
+    .login-card p { color: #7f8c8d; margin-bottom: 20px; }
+    .login-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #ecf0f1; border-radius: 8px; font-size: 14px; }
+    .login-input:focus { outline: none; border-color: #667eea; }
+    .login-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .login-btn:hover { background: #764ba2; }
+    .main-content { display: none; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .main-content.active { display: block; }
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); padding: 20px; margin-bottom: 20px; }
+    .card-header { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #667eea; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 600; font-size: 13px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 6px; font-size: 13px; font-family: inherit; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: #667eea; color: white; width: 100%; }
+    .btn-primary:hover { background: #5568d3; }
+    .btn-secondary { background: #95a5a6; color: white; }
+    .btn-secondary:hover { background: #7f8c8d; }
+    .btn-small { padding: 5px 10px; font-size: 12px; }
+    .post-item { background: #f8f9fa; border-left: 3px solid #667eea; padding: 12px; margin-bottom: 12px; border-radius: 6px; }
+    .post-title { font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+    .post-meta { color: #95a5a6; font-size: 11px; }
+    .post-content { color: #555; font-size: 13px; margin: 8px 0; }
+    .group-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; cursor: pointer; }
+    .group-name { font-weight: bold; margin-bottom: 5px; }
+    .group-info { font-size: 12px; opacity: 0.9; }
+    .alert { padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; display: none; }
+    .alert.show { display: block; }
+    .alert-success { background: #d4edda; color: #155724; }
+    .alert-danger { background: #f8d7da; color: #721c24; }
+    .empty-state { text-align: center; padding: 30px 20px; color: #95a5a6; }
+    @media (max-width: 768px) { .navbar-menu { flex-direction: column; gap: 8px; } }
   </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
   <div class="navbar-brand">🛒 متجري</div>
   <ul class="navbar-menu">
@@ -345,22 +68,19 @@
   </ul>
 </nav>
 
-<!-- LOGIN PAGE -->
 <div id="loginPage" class="login-container">
   <div class="login-card">
     <h1>🛒 متجري</h1>
     <p>منصة التواصل والتسوق والمجموعات</p>
-    <input type="text" id="username" class="login-input" placeholder="اسم المستخدم" required>
+    <input type="email" id="email" class="login-input" placeholder="الإيميل" required>
     <input type="password" id="password" class="login-input" placeholder="كلمة السر" required>
     <button class="login-btn" onclick="handleLogin()">دخول</button>
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div id="mainContent" class="main-content">
   <div id="alertBox" class="alert"></div>
 
-  <!-- POSTS SECTION -->
   <section id="postsSection" class="section active">
     <div class="card">
       <div class="card-header">📝 منشور جديد</div>
@@ -374,16 +94,12 @@
         <button type="submit" class="btn btn-primary">نشر</button>
       </form>
     </div>
-
     <div class="card">
       <div class="card-header">📋 المنشورات</div>
-      <div id="postsList">
-        <div class="empty-state">📭 لا توجد منشورات</div>
-      </div>
+      <div id="postsList"><div class="empty-state">📭 لا توجد منشورات</div></div>
     </div>
   </section>
 
-  <!-- GROUPS SECTION -->
   <section id="groupsSection" class="section">
     <div class="card">
       <div class="card-header">➕ مجموعة جديدة</div>
@@ -397,16 +113,12 @@
         <button type="submit" class="btn btn-primary">إنشاء</button>
       </form>
     </div>
-
     <div class="card">
       <div class="card-header">👥 المجموعات</div>
-      <div id="groupsList">
-        <div class="empty-state">👥 لا توجد مجموعات</div>
-      </div>
+      <div id="groupsList"><div class="empty-state">👥 لا توجد مجموعات</div></div>
     </div>
   </section>
 
-  <!-- MESSAGES SECTION -->
   <section id="messagesSection" class="section">
     <div class="card">
       <div class="card-header">💬 رسالة جديدة</div>
@@ -420,25 +132,22 @@
         <button type="submit" class="btn btn-primary">إرسال</button>
       </form>
     </div>
-
     <div class="card">
       <div class="card-header">💬 المحادثات</div>
-      <div id="messagesList">
-        <div class="empty-state">💌 لا توجد رسائل</div>
-      </div>
+      <div id="messagesList"><div class="empty-state">💌 لا توجد رسائل</div></div>
     </div>
   </section>
 </div>
 
 <script>
 const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-// حط الـ anon key بتاعتك من Supabase > Settings > API
+// حط الـ anon key بتاعتك هنا من Supabase > Settings > API
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'; 
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
 
-// LOGIN بالـ Supabase الحقي
+// LOGIN
 async function handleLogin() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -448,10 +157,7 @@ async function handleLogin() {
     return;
   }
 
-  const { data, error } = await db.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
 
   if (error) {
     showAlert(error.message, 'danger');
@@ -459,7 +165,6 @@ async function handleLogin() {
   }
 
   user = data.user;
-  localStorage.setItem('user', JSON.stringify(user));
   showMain();
   loadPosts();
   loadGroups();
@@ -473,11 +178,101 @@ function showMain() {
 
 async function handleLogout() {
   await db.auth.signOut();
-  localStorage.removeItem('user');
   location.reload();
 }
 
-// INIT - يشيك لو فيه يوزر مسجل
+function switchSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id + 'Section').classList.add('active');
+}
+
+function showAlert(msg, type = 'success') {
+  const box = document.getElementById('alertBox');
+  box.textContent = msg;
+  box.className = `alert show alert-${type}`;
+  setTimeout(() => box.classList.remove('show'), 3000);
+}
+
+// POSTS
+async function savePost(e) {
+  e.preventDefault();
+  const title = document.getElementById('postTitle').value;
+  const content = document.getElementById('postContent').value;
+
+  const { error } = await db.from('posts').insert([{
+    title, content, author: user.email, created_at: new Date()
+  }]);
+
+  if (error) { showAlert(error.message, 'danger'); return; }
+  showAlert('✅ تم النشر');
+  e.target.reset();
+  loadPosts();
+}
+
+async function loadPosts() {
+  const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
+  const list = document.getElementById('postsList');
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="empty-state">📭 لا توجد منشورات</div>';
+    return;
+  }
+  list.innerHTML = data.map(p => `
+    <div class="post-item">
+      <div class="post-title">${p.title}</div>
+      <div class="post-meta">👤 ${p.author} | ${new Date(p.created_at).toLocaleDateString('ar')}</div>
+      <div class="post-content">${p.content}</div>
+    </div>
+  `).join('');
+}
+
+// GROUPS
+async function saveGroup(e) {
+  e.preventDefault();
+  const name = document.getElementById('groupName').value;
+  const desc = document.getElementById('groupDesc').value;
+
+  const { error } = await db.from('groups').insert([{
+    name, description: desc, owner: user.email, created_at: new Date()
+  }]);
+
+  if (error) { showAlert(error.message, 'danger'); return; }
+  showAlert('✅ تم الإنشاء');
+  e.target.reset();
+  loadGroups();
+}
+
+async function loadGroups() {
+  const { data } = await db.from('groups').select('*').order('created_at', { ascending: false });
+  const list = document.getElementById('groupsList');
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="empty-state">👥 لا توجد مجموعات</div>';
+    return;
+  }
+  list.innerHTML = data.map(g => `
+    <div class="group-card">
+      <div class="group-name">${g.name}</div>
+      <div class="group-info">${g.description}</div>
+      <div class="group-info">👤 ${g.owner}</div>
+    </div>
+  `).join('');
+}
+
+// MESSAGES
+async function sendMessage(e) {
+  e.preventDefault();
+  const to = document.getElementById('messageTo').value;
+  const text = document.getElementById('messageText').value;
+
+  const { error } = await db.from('messages').insert([{
+    from: user.email, to, content: text, created_at: new Date()
+  }]);
+
+  if (error) { showAlert(error.message, 'danger'); return; }
+  showAlert('✅ تم الإرسال');
+  e.target.reset();
+}
+
+// INIT - يشيك لو فيه سيشن
 window.addEventListener('load', async () => {
   const { data: { session } = await db.auth.getSession();
   if (session) {
@@ -487,127 +282,6 @@ window.addEventListener('load', async () => {
     loadGroups();
   }
 });
-
-
-  // SWITCH SECTION
-  function switchSection(id) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(id + 'Section').classList.add('active');
-  }
-
-  // ALERT
-  function showAlert(msg, type = 'success') {
-    const box = document.getElementById('alertBox');
-    box.textContent = msg;
-    box.className = `alert show alert-${type}`;
-    setTimeout(() => box.classList.remove('show'), 3000);
-  }
-
-  // POSTS
-  async function savePost(e) {
-    e.preventDefault();
-    const title = document.getElementById('postTitle').value;
-    const content = document.getElementById('postContent').value;
-
-    const { error } = await db.from('posts').insert([{
-      title, content, author: user.username, created_at: new Date()
-    }]);
-
-    if (error) {
-      showAlert(error.message, 'danger');
-      return;
-    }
-
-    showAlert('✅ تم النشر');
-    e.target.reset();
-    loadPosts();
-  }
-
-  async function loadPosts() {
-    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
-
-    const list = document.getElementById('postsList');
-    if (!data || !data.length) {
-      list.innerHTML = '<div class="empty-state">📭 لا توجد منشورات</div>';
-      return;
-    }
-
-    list.innerHTML = data.map(p => `
-      <div class="post-item">
-        <div class="post-title">${p.title}</div>
-        <div class="post-meta">👤 ${p.author} | ${new Date(p.created_at).toLocaleDateString('ar')}</div>
-        <div class="post-content">${p.content}</div>
-      </div>
-    `).join('');
-  }
-
-  // GROUPS
-  async function saveGroup(e) {
-    e.preventDefault();
-    const name = document.getElementById('groupName').value;
-    const desc = document.getElementById('groupDesc').value;
-
-    const { error } = await db.from('groups').insert([{
-      name, description: desc, owner: user.username, created_at: new Date()
-    }]);
-
-    if (error) {
-      showAlert(error.message, 'danger');
-      return;
-    }
-
-    showAlert('✅ تم الإنشاء');
-    e.target.reset();
-    loadGroups();
-  }
-
-  async function loadGroups() {
-    const { data } = await db.from('groups').select('*').order('created_at', { ascending: false });
-
-    const list = document.getElementById('groupsList');
-    if (!data || !data.length) {
-      list.innerHTML = '<div class="empty-state">👥 لا توجد مجموعات</div>';
-      return;
-    }
-
-    list.innerHTML = data.map(g => `
-      <div class="group-card">
-        <div class="group-name">${g.name}</div>
-        <div class="group-info">${g.description}</div>
-        <div class="group-info">👤 ${g.owner}</div>
-      </div>
-    `).join('');
-  }
-
-  // MESSAGES
-  async function sendMessage(e) {
-    e.preventDefault();
-    const to = document.getElementById('messageTo').value;
-    const text = document.getElementById('messageText').value;
-
-    const { error } = await db.from('messages').insert([{
-      from: user.username, to, content: text, created_at: new Date()
-    }]);
-
-    if (error) {
-      showAlert(error.message, 'danger');
-      return;
-    }
-
-    showAlert('✅ تم الإرسال');
-    e.target.reset();
-  }
-
-  // INIT
-  window.addEventListener('load', () => {
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      user = JSON.parse(stored);
-      showMain();
-      loadPosts();
-      loadGroups();
-    }
-  });
 </script>
 
 </body>
