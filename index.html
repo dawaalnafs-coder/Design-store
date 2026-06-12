@@ -274,9 +274,9 @@ async function sendMessage(e) {
 
 // INIT - يشيك لو فيه سيشن
 window.addEventListener('load', async () => {
-  const { data: { session } = await db.auth.getSession();
-  if (session) {
-    user = session.user;
+  const { data, error } = await db.auth.getSession();
+  if (data.session) {
+    user = data.session.user;
     showMain();
     loadPosts();
     loadGroups();
