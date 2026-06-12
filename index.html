@@ -116,6 +116,18 @@ async function handleLogin() {
   const { data, error } = await db.auth.signInWithPassword({ email, password });
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
   user = data.user;
+  user = data.user;
+
+// تشيك لو اليوزر محظور
+const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
+if(banned) {
+  await db.auth.signOut();
+  user = null;
+  return showAlert('authAlert', '🚫 حسابك محظور. السبب: ' + banned.reason, 'error');
+}
+
+showMain();
+loadPosts();
   showMain();
   loadPosts();
 }
