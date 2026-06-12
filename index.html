@@ -431,25 +431,84 @@
 </div>
 
 <script>
-  const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppU';
-  const db = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
+// حط الـ anon key بتاعتك من Supabase > Settings > API
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'; 
+const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-  let user = null;
+let user = null;
 
-  // LOGIN
-  async function handleLogin() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+// LOGIN بالـ Supabase الحقي
+async function handleLogin() {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
 
-    if (!username || !password) return;
+  if (!email || !password) {
+    showAlert('اكتب الإيميل والباسورد', 'danger');
+    return;
+  }
 
-    user = { username };
-    localStorage.setItem('user', JSON.stringify(user));
+  const { data, error } = await db.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    showAlert(error.message, 'danger');
+    return;
+  }
+
+  user = data.user;
+  localStorage.setItem('user', JSON.stringify(user));
+  showMain();
+  loadPosts();
+  loadGroups();
+  showAlert('✅ تم تسجيل الدخول');
+}
+
+function showMain() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainContent').classList.add('active');
+}
+
+async function handleLogout() {
+  await db.auth.signOut();
+  localStorage.removeItem('user');
+  location.reload();
+}
+
+// INIT - يشيك لو فيه يوزر مسجل
+window.addEventListener('load', async () => {
+  const { data: { session } = await db.auth.getSession();
+  if (session) {
+    user = session.user;
     showMain();
     loadPosts();
     loadGroups();
   }
+});
+
+function showMain() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainContent').classList.add('active');
+}
+
+async function handleLogout() {
+  await db.auth.signOut();
+  localStorage.removeItem('user');
+  location.reload();
+}
+
+// INIT - يشيك لو فيه يوزر مسجل
+window.addEventListener('load', async () => {
+  const { data: { session } = await db.auth.getSession();
+  if (session) {
+    user = session.user;
+    showMain();
+    loadPosts();
+    loadGroups();
+  }
+});
 
   function showMain() {
     document.getElementById('loginPage').style.display = 'none';
