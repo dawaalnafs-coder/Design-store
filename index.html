@@ -87,7 +87,7 @@ button.warn{background:#f39c12}
 
 <script>
 const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
+const supabaseKey = '';
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
@@ -190,6 +190,15 @@ async function loadPosts() {
           `<button class="danger" onclick="deletePost('${p.id}')">🗑️ حذف</button>` : ''}
         ${user.email !== ADMIN_EMAIL ? 
           `<button class="warn" onclick="reportPost('${p.id}')">🚩 إبلاغ</button>` : ''}
+          <div style="margin-top:10px;display:flex;gap:15px;align-items:center">
+  <button onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
+  <span style="cursor:pointer;color:#667eea" onclick="toggleComments(${p.id})">💬 تعليقات</span>
+</div>
+<div id="comments-${p.id}" style="display:none;margin-top:10px">
+  <input id="input-${p.id}" placeholder="اكتب تعليق..." style="width:70%;padding:5px">
+  <button onclick="addComment(${p.id})">إرسال</button>
+  <div id="list-${p.id}" style="margin-top:10px"></div>
+</div>
       </div>
     </div>
   `).join('');
