@@ -20,9 +20,9 @@ button.warn{background:#f39c12}
 .hidden{display:none}
 .post-item{border-bottom:1px solid #eee;padding:15px 0}
 .post-title{font-weight:bold;font-size:18px;margin-bottom:5px}
-.post-meta{color:#777;font-size:12px;margin-bottom:8px}
+.post-meta{color:#777;font-size:12px;margin-bottom:8px;display:flex;align-items:center}
 .post-content{line-height:1.6}
-.post-actions{margin-top:10px;display:flex;gap:8px}
+.post-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .alert{padding:12px;border-radius:8px;margin:10px 0;display:none}
 .alert.success{background:#d4edda;color:#155724}
 .alert.error{background:#f8d7da;color:#721c24}
@@ -40,13 +40,13 @@ button.warn{background:#f39c12}
     <button id="loginTab" class="active" onclick="switchAuth('login')">دخول</button>
     <button id="registerTab" onclick="switchAuth('register')">تسجيل</button>
   </div>
-  
+
   <div id="loginForm">
     <input type="email" id="loginEmail" placeholder="الإيميل">
     <input type="password" id="loginPassword" placeholder="كلمة المرور">
     <button onclick="handleLogin()" style="width:100%">دخول</button>
   </div>
-  
+
   <div id="registerForm" class="hidden">
     <input type="email" id="registerEmail" placeholder="الإيميل">
     <input type="password" id="registerPassword" placeholder="كلمة مرور قوية">
@@ -87,16 +87,16 @@ button.warn{background:#f39c12}
 
 <script>
 const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-const supabaseKey = '';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'; // حط المفتاح الجديد هنا
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
-const ADMIN_EMAIL = 'dawaahafs@gmail.com'; // خلي ده إيميلك
+const ADMIN_EMAIL = 'dawaahafs@gmail.com';
 
 // التبويبات
 function switchAuth(type) {
-  document.getElementById('loginForm').classList.toggle('hidden', type !== 'login');
-  document.getElementById('registerForm').classList.toggle('hidden', type !== 'register');
+  document.getElementById('loginForm').classList.toggle('hidden', type!== 'login');
+  document.getElementById('registerForm').classList.toggle('hidden', type!== 'register');
   document.getElementById('loginTab').classList.toggle('active', type === 'login');
   document.getElementById('registerTab').classList.toggle('active', type === 'register');
 }
@@ -106,28 +106,26 @@ async function handleRegister() {
   const email = document.getElementById('registerEmail').value;
   const password = document.getElementById('registerPassword').value;
   const { error } = await db.auth.signUp({ email, password });
-  showAlert('authAlert', error ? '❌ ' + error.message : '✅ تم التسجيل! شيك على إيميلك', error ? 'error' : 'success');
+  showAlert('authAlert', error? '❌ ' + error.message : '✅ تم التسجيل! شيك على إيميلك', error? 'error' : 'success');
 }
 
-// دخول
+// دخول + تشيك الحظر
 async function handleLogin() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const { data, error } = await db.auth.signInWithPassword({ email, password });
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
-  user = data.user;
+
   user = data.user;
 
-// تشيك لو اليوزر محظور
-const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
-if(banned) {
-  await db.auth.signOut();
-  user = null;
-  return showAlert('authAlert', '🚫 حسابك محظور. السبب: ' + banned.reason, 'error');
-}
+  // تشيك لو اليوزر محظور
+  const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
+  if(banned) {
+    await db.auth.signOut();
+    user = null;
+    return showAlert('authAlert', '🚫 حسابك محظور. السبب: ' + banned.reason, 'error');
+  }
 
-showMain();
-loadPosts();
   showMain();
   loadPosts();
 }
@@ -145,8 +143,7 @@ function showMain() {
   document.getElementById('authSection').classList.add('hidden');
   document.getElementById('mainSection').classList.remove('hidden');
   document.getElementById('userEmail').textContent = user.email;
-  
-  // إظهار لوحة الأدمن لو هو الأدمن
+
   if(user.email === ADMIN_EMAIL) {
     document.getElementById('adminPanel').classList.remove('hidden');
   }
@@ -156,59 +153,67 @@ function showMain() {
 async function createPost() {
   const title = document.getElementById('postTitle').value;
   const content = document.getElementById('postContent').value;
-  if(!title || !content) return showAlert('postAlert', '❌ اكتب عنوان ومحتوى', 'error');
-  
+  if(!title ||!content) return showAlert('postAlert', '❌ اكتب عنوان ومحتوى', 'error');
+
   const { error } = await db.from('posts').insert({
     title, content, author: user.email, user_id: user.id
   });
-  
+
   if(error) return showAlert('postAlert', '❌ خطأ: ' + error.message, 'error');
-  
+
   document.getElementById('postTitle').value = '';
   document.getElementById('postContent').value = '';
   showAlert('postAlert', '✅ تم النشر', 'success');
   loadPosts();
 }
 
-// تحميل المنشورات
+// دايرة الأفاتار M أزرق F أحمر
+function avatar(name, gender='M') {
+  let letter = name? name[0].toUpperCase() : 'U';
+  let color = gender === 'F'? '#e74c3c' : '#3498db';
+  return `<div style="width:32px;height:32px;border-radius:50%;background:${color};color:white;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;margin-left:8px;font-size:14px">${letter}</div>`;
+}
+
+// تحميل المنشورات + اللايكات والتعليقات
 async function loadPosts() {
   const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
   const list = document.getElementById('postsList');
-  
+
   if(!data || data.length === 0) {
     list.innerHTML = 'لا توجد منشورات بعد';
     return;
   }
-  
+
   list.innerHTML = data.map(p => `
     <div class="post-item">
       <div class="post-title">${p.title}</div>
-      <div class="post-meta">👤 ${p.author} | ${new Date(p.created_at).toLocaleDateString('ar-EG')}</div>
+      <div class="post-meta">${avatar(p.author)} 👤 ${p.author} | ${new Date(p.created_at).toLocaleDateString('ar-EG')}</div>
       <div class="post-content">${p.content}</div>
       <div class="post-actions">
-        ${user.email === ADMIN_EMAIL || user.id === p.user_id ? 
+        ${user.email === ADMIN_EMAIL || user.id === p.user_id?
           `<button class="danger" onclick="deletePost('${p.id}')">🗑️ حذف</button>` : ''}
-        ${user.email !== ADMIN_EMAIL ? 
+        ${user.email!== ADMIN_EMAIL?
           `<button class="warn" onclick="reportPost('${p.id}')">🚩 إبلاغ</button>` : ''}
-          <div style="margin-top:10px;display:flex;gap:15px;align-items:center">
-  <button onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
-  <span style="cursor:pointer;color:#667eea" onclick="toggleComments(${p.id})">💬 تعليقات</span>
-</div>
-<div id="comments-${p.id}" style="display:none;margin-top:10px">
-  <input id="input-${p.id}" placeholder="اكتب تعليق..." style="width:70%;padding:5px">
-  <button onclick="addComment(${p.id})">إرسال</button>
-  <div id="list-${p.id}" style="margin-top:10px"></div>
-</div>
+        <button onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
+        <span style="cursor:pointer;color:#667eea" onclick="toggleComments(${p.id})">💬 تعليقات</span>
+      </div>
+      <div id="comments-${p.id}" style="display:none;margin-top:10px">
+        <input id="input-${p.id}" placeholder="اكتب تعليق..." style="width:70%;padding:5px">
+        <button onclick="addComment(${p.id})">إرسال</button>
+        <div id="list-${p.id}" style="margin-top:10px"></div>
       </div>
     </div>
   `).join('');
+
+  // حمل عدد اللايكات لكل بوست
+  data.forEach(p => loadLikes(p.id));
 }
 
-// حذف منشور - للأدمن وصاحب البوست
+// حذف منشور
 async function deletePost(id) {
   if(!confirm('متأكد عايز تحذف المنشور؟')) return;
-  const { error } = await db.from('posts').delete().eq('id', id);
-  if(error) return alert('خطأ: ' + error.message);
+  await db.from('posts').delete().eq('id', id);
+  await db.from('reports').delete().eq('post_id', id);
   loadPosts();
 }
 
@@ -217,6 +222,59 @@ async function reportPost(id) {
   const { error } = await db.from('reports').insert({ post_id: id, reporter_id: user.id });
   if(error) return alert('أبلغت عنه قبل كده');
   alert('✅ تم الإبلاغ. الأدمن هيراجع المنشور');
+}
+
+// اللايكات
+async function toggleLike(postId) {
+  if(!user) return alert('سجل دخول الأول');
+
+  const { data: existing } = await db.from('likes').select('*').eq('post_id', postId).eq('user_id', user.id).single();
+
+  if(existing) {
+    await db.from('likes').delete().eq('id', existing.id);
+  } else {
+    await db.from('likes').insert({post_id: postId, user_id: user.id});
+  }
+  loadLikes(postId);
+}
+
+async function loadLikes(postId) {
+  const { count } = await db.from('likes').select('*', {count:'exact'}).eq('post_id', postId);
+  const btn = document.getElementById(`like-${postId}`);
+  if(btn) btn.innerHTML = `❤️ ${count || 0}`;
+}
+
+// التعليقات
+function toggleComments(postId) {
+  const div = document.getElementById(`comments-${postId}`);
+  div.style.display = div.style.display === 'none'? 'block' : 'none';
+  if(div.style.display === 'block') loadComments(postId);
+}
+
+async function addComment(postId) {
+  if(!user) return alert('سجل دخول الأول');
+  const input = document.getElementById(`input-${postId}`);
+  if(!input.value.trim()) return;
+
+  await db.from('comments').insert({
+    post_id: postId,
+    user_id: user.id,
+    content: input.value.trim()
+  });
+  input.value = '';
+  loadComments(postId);
+}
+
+async function loadComments(postId) {
+  const { data } = await db.from('comments').select('*').eq('post_id', postId).order('created_at');
+  const list = document.getElementById(`list-${postId}`);
+
+  list.innerHTML = data.map(c => `
+    <div style="display:flex;align-items:center;margin:5px 0;padding:8px;background:#f8f9fa;border-radius:8px">
+      ${avatar(c.author)}
+      <div><b>${c.author}</b><br><small>${c.content}</small></div>
+    </div>
+  `).join('');
 }
 
 // رسائل التنبيه
@@ -228,11 +286,18 @@ function showAlert(id, msg, type) {
   setTimeout(() => el.style.display = 'none', 3000);
 }
 
-// تشيك لو فيه سيشن عند فتح الصفحة
+// تشيك السيشن عند الفتح
 window.addEventListener('load', async () => {
   const { data } = await db.auth.getSession();
   if(data.session) {
     user = data.session.user;
+
+    const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
+    if(banned) {
+      await db.auth.signOut();
+      return;
+    }
+
     showMain();
     loadPosts();
   }
