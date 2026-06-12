@@ -1,56 +1,59 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة الأدمن</title>
+<meta charset="UTF-8"><title>لوحة الأدمن</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 body{font-family:Tajawal;background:#f5f7fa;padding:20px}
 .card{background:white;padding:15px;margin:10px 0;border-radius:12px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-button{background:#e74c3c;color:white;border:none;padding:8px 15px;border-radius:6px;cursor:pointer}
-h2{color:#667eea}
+.btn{border:none;padding:8px 15px;border-radius:6px;cursor:pointer;margin:3px}
+.btn-del{background:#e74c3c;color:white}
+.btn-ban{background:#555;color:white}
 </style>
 </head>
 <body>
 <h2>🔐 لوحة الأدمن - البلاغات</h2>
-<div id="list">سجل دخول من index.html الأول...</div>
+<div id="list">جاري التحميل...</div>
 
 <script>
 const db = supabase.createClient('https://pbadwhwdodhwutuzjwuz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk');
 
-// يتأكد إنك أدمن قبل ما يعرض البلاغات
 db.auth.getSession().then(({data}) => {
-  if(!data.session) {
-    window.location.href = 'index.html'; // يحولك تسجل دخول
-    return;
-  }
+  if(!data.session) return window.location.href = 'index.html';
   if(data.session.user.email !== 'dawaahafs@gmail.com') {
     document.getElementById('list').innerHTML = '❌ إيميلك مش إيميل الأدمن';
     return;
   }
   loadReports();
 });
-  
+
 async function loadReports() {
   const { data } = await db.from('reports').select('*, posts(*)').order('created_at', {ascending:false});
-  if(!data || data.length === 0) return document.getElementById('list').innerHTML = '✅ مفيش بلاغات حالياً';
+  if(!data || data.length === 0) return document.getElementById('list').innerHTML = '✅ مفيش بلاغات';
   
   document.getElementById('list').innerHTML = data.map(r => `
     <div class="card">
       <b>العنوان:</b> ${r.posts.title}<br>
       <b>الكاتب:</b> ${r.posts.author}<br>
       <b>المحتوى:</b> ${r.posts.content.substring(0,100)}...<br>
-      <b>وقت البلاغ:</b> ${new Date(r.created_at).toLocaleString('ar-EG')}<br>
-      <button onclick="deletePost(${r.post_id})">🗑️ احذف البوست</button>
+      <button class="btn btn-del" onclick="deletePost(${r.post_id})">🗑️ حذف البوست</button>
+      <button class="btn btn-ban" onclick="banUser('${r.posts.user_id}', '${r.posts.author}')">🚫 حظر المستخدم</button>
     </div>
   `).join('');
 }
 
 async function deletePost(id) {
-  if(!confirm('متأكد؟ الحذف نهائي')) return;
+  if(!confirm('حذف نهائي؟')) return;
   await db.from('posts').delete().eq('id', id);
   await db.from('reports').delete().eq('post_id', id);
+  loadReports();
+}
+
+async function banUser(userId, author) {
+  if(!confirm(`حظر ${author} نهائياً؟`)) return;
+  await db.from('banned_users').insert({user_id: userId, reason: 'مخالفة من الأدمن'});
+  await db.from('posts').delete().eq('user_id', userId); // يحذف كل بوستاته
+  alert('تم الحظر وحذف كل منشوراته');
   loadReports();
 }
 </script>
