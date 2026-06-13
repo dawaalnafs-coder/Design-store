@@ -124,9 +124,28 @@ async function handleRegister() {
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
   if(data.user) {
-    await db.from('profiles').insert({ id: data.user.id, gender: gender, username: username, last_seen: new Date() });
+    // نعمل البروفايل فورا حتى لو الإيميل لسه متفعلش
+    const { error: profileError } = await db.from('profiles').insert({ 
+      id: data.user.id, 
+      username: username, 
+      gender: gender,
+      created_at: new Date(),
+      last_seen: new Date()
+    });
+    
+    if(profileError) {
+      console.log('خطأ بروفايل:', profileError.message);
+    }
   }
-  showAlert('authAlert', '✅ تم التسجيل! شيك على إيميلك', 'success');
+  
+  showAlert('authAlert', '✅ تم التسجيل! تقدر تدخل دلوقتي حتى لو الإيميل وهمي', 'success');
+  
+  // ندخل اليوزر أوتوماتيك بعد التسجيل عشان ميحتاجش يفعل الإيميل
+  setTimeout(() => {
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = password;
+    switchAuth('login');
+  }, 1000);
 }
 
 async function handleLogin() {
