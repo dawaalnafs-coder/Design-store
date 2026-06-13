@@ -164,15 +164,26 @@ async function avatar(userId) {
   return `<div class="avatar" style="background:${color}">${letter}</div>`;
 }
 
+// ===== تعديل التاريخ عشان مصر +2 =====
 function timeAgo(date) {
-  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  const now = new Date();
+  const postDate = new Date(date);
+  // مصر +2 ساعات
+  const diffMs = now.getTime() - postDate.getTime() - (2 * 60 * 60 * 1000);
+
+  const seconds = Math.floor(diffMs / 1000);
   if(seconds < 60) return 'الآن';
+
   const minutes = Math.floor(seconds / 60);
   if(minutes < 60) return `منذ ${minutes} دقيقة`;
+
   const hours = Math.floor(minutes / 60);
   if(hours < 24) return `منذ ${hours} ساعة`;
+
   const days = Math.floor(hours / 24);
-  return `منذ ${days} يوم`;
+  if(days < 30) return `منذ ${days} يوم`;
+
+  return postDate.toLocaleDateString('ar-EG');
 }
 
 async function loadPosts() {
@@ -204,12 +215,12 @@ async function loadPosts() {
           <button class="btn-comment" onclick="toggleComments(${p.id})">💬 تعليقات</button>
         </div>
         <div id="comments-${p.id}" class="comments-box hidden">
-  <div class="whatsapp-input">
-    <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1"></textarea>
-    <button onclick="addComment(${p.id})">ᯓ➤</button>
-  </div>
-  <div id="list-${p.id}" class="comments-list"></div>
-</div>
+          <div class="whatsapp-input">
+            <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1" class="comment-field"></textarea>
+            <button onclick="addComment(${p.id})">ᯓ➤</button>
+          </div>
+          <div id="list-${p.id}" class="comments-list"></div>
+        </div>
       </div>
     `;
   }
@@ -284,9 +295,9 @@ async function deleteComment(commentId, postId) {
 
 async function loadComments(postId) {
   const { data, error } = await db.from('comments')
-  .select('id, content, created_at, user_id, profiles(username, gender)')
-  .eq('post_id', postId)
-  .order('created_at', { ascending: true });
+ .select('id, content, created_at, user_id, profiles(username, gender)')
+ .eq('post_id', postId)
+ .order('created_at', { ascending: true });
 
   const list = document.getElementById(`list-${postId}`);
   if (error) {
@@ -303,7 +314,7 @@ async function loadComments(postId) {
     let userData = c.profiles || {username: 'مجهول', gender: 'M'};
     let avatarHTML = await avatar(c.user_id);
     let deleteBtn = (user.email === ADMIN_EMAIL || user.id === c.user_id)
-   ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
+  ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
 
     commentsHTML += `
       <div class="comment-item">
@@ -330,7 +341,7 @@ function showAlert(id, msg, type) {
   setTimeout(() => el.style.display = 'none', 3000);
 }
 
-// تكبير خانة التعليق أوتوماتيك زي واتساب
+// تكبير خانة التعليق أوتوماتيك - عدلت الـ class
 document.addEventListener('input', e => {
   if(e.target.matches('.comment-field')) {
     e.target.style.height = 'auto';
