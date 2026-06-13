@@ -311,7 +311,7 @@ async function addComment(postId) {
 
 async function loadComments(postId) {
   const { data } = await db.from('comments')
-  .select('id, content, created_at, user_id, profiles(email, gender)')
+  .select('id, content, created_at, user_id, profiles!inner(email, gender)')
   .eq('post_id', postId)
   .order('created_at', { ascending: true });
 
