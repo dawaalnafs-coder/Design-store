@@ -275,18 +275,21 @@ function toggleComments(postId) {
   if(div.style.display === 'block') loadComments(postId);
 }
 
-async function addComment(postId) {
-  if(!user) return alert('سجل دخول الأول');
-  const input = document.getElementById(`input-${postId}`);
-  if(!input.value.trim()) return;
-
-  await db.from('comments').insert({
+async function addComment(postId, commentText) {
+  const { data: { user } = await db.auth.getUser();
+  
+  const { error } = await db.from('comments').insert({
     post_id: postId,
-    user_id: user.id,
-    content: input.value.trim()
+    content: commentText,
+    user_id: user.id  // ده لازم عشان الـ Policy
   });
-  input.value = '';
-  loadComments(postId);
+  
+  if(error) {
+    console.log('خطأ التعليق:', error.message);
+    alert('خطأ: ' + error.message);
+  } else {
+    loadComments(postId); // اعمل ريفريش للتعليقات
+  }
 }
 
 async function loadComments(postId) {
