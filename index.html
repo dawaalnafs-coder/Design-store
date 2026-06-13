@@ -92,7 +92,7 @@ button.warn{background:#f39c12}
 
 <script>
 const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'; // حط المفتاح anon public هنا
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'; // حط المفتاح anon public هنا من Supabase → Settings → API
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
@@ -108,25 +108,31 @@ function switchAuth(type) {
 
 // تسجيل + حفظ الجنس
 async function handleRegister() {
-  const email = document.getElementById('registerEmail').value;
+  const email = document.getElementById('registerEmail').value.trim();
   const password = document.getElementById('registerPassword').value;
   const gender = document.getElementById('registerGender').value;
 
+  if(!email ||!password) return showAlert('authAlert', '❌ اكتب الإيميل والباسوورد', 'error');
   if(!gender) return showAlert('authAlert', '❌ اختار الجنس', 'error');
 
   const { data, error } = await db.auth.signUp({ email, password });
 
-  if(!error && data.user) {
+  if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
+
+  if(data.user) {
     await db.from('profiles').insert({ id: data.user.id, gender: gender });
   }
 
-  showAlert('authAlert', error? '❌ ' + error.message : '✅ تم التسجيل! شيك على إيميلك', error? 'error' : 'success');
+  showAlert('authAlert', '✅ تم التسجيل! شيك على إيميلك وفعّل الحساب', 'success');
 }
 
 // دخول + تشيك الحظر
 async function handleLogin() {
-  const email = document.getElementById('loginEmail').value;
+  const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
+
+  if(!email ||!password) return showAlert('authAlert', '❌ اكتب الإيميل والباسوورد', 'error');
+
   const { data, error } = await db.auth.signInWithPassword({ email, password });
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
@@ -164,8 +170,10 @@ function showMain() {
 
 // نشر منشور
 async function createPost() {
-  const title = document.getElementById('postTitle').value;
-  const content = document.getElementById('postContent').value;
+  if(!user) return alert('سجل دخول الأول');
+
+  const title = document.getElementById('postTitle').value.trim();
+  const content = document.getElementById('postContent').value.trim();
   if(!title ||!content) return showAlert('postAlert', '❌ اكتب عنوان ومحتوى', 'error');
 
   const { error } = await db.from('posts').insert({
@@ -176,7 +184,7 @@ async function createPost() {
 
   document.getElementById('postTitle').value = '';
   document.getElementById('postContent').value = '';
-  showAlert('postAlert', '✅ تم النشر', 'success');
+  showAlert('postAlert', '✅ تم النشر بنجاح', 'success');
   loadPosts();
 }
 
@@ -193,8 +201,10 @@ async function avatar(name, userId) {
   return `<div style="width:32px;height:32px;border-radius:50%;background:${color};color:white;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;margin-left:8px;font-size:14px">${letter}</div>`;
 }
 
-// تحميل المنشورات - اتعدلت عشان الـ await
+// تحميل المنشورات
 async function loadPosts() {
+  if(!user) return;
+
   const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
   const list = document.getElementById('postsList');
 
@@ -214,9 +224,9 @@ async function loadPosts() {
         <div class="post-content">${p.content}</div>
         <div class="post-actions">
           ${user.email === ADMIN_EMAIL || user.id === p.user_id?
-            `<button class="danger" onclick="deletePost('${p.id}')">🗑️ حذف</button>` : ''}
+            `<button class="danger" onclick="deletePost(${p.id})">🗑️ حذف</button>` : ''}
           ${user.email!== ADMIN_EMAIL?
-            `<button class="warn" onclick="reportPost('${p.id}')">🚩 إبلاغ</button>` : ''}
+            `<button class="warn" onclick="reportPost(${p.id})">🚩 إبلاغ</button>` : ''}
           <button onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
           <span style="cursor:pointer;color:#667eea" onclick="toggleComments(${p.id})">💬 تعليقات</span>
         </div>
@@ -243,6 +253,7 @@ async function deletePost(id) {
 
 // إبلاغ عن منشور
 async function reportPost(id) {
+  if(!user) return;
   const { error } = await db.from('reports').insert({ post_id: id, reporter_id: user.id });
   if(error) return alert('أبلغت عنه قبل كده');
   alert('✅ تم الإبلاغ. الأدمن هيراجع المنشور');
@@ -268,35 +279,41 @@ async function loadLikes(postId) {
   if(btn) btn.innerHTML = `❤️ ${count || 0}`;
 }
 
-// التعليقات
+// التعليقات - معدلة بالكامل
 function toggleComments(postId) {
   const div = document.getElementById(`comments-${postId}`);
   div.style.display = div.style.display === 'none'? 'block' : 'none';
   if(div.style.display === 'block') loadComments(postId);
 }
 
-async function addComment(postId, commentText) {
-  const { data: { user } = await db.auth.getUser();
-  
+async function addComment(postId) {
+  if(!user) return alert('سجل دخول الأول');
+
+  const input = document.getElementById(`input-${postId}`);
+  const commentText = input.value.trim();
+
+  if(!commentText) return alert('اكتب تعليق الأول');
+
   const { error } = await db.from('comments').insert({
     post_id: postId,
     content: commentText,
-    user_id: user.id  // ده لازم عشان الـ Policy
+    user_id: user.id
   });
-  
+
   if(error) {
-    console.log('خطأ التعليق:', error.message);
+    console.log('خطأ التعليق:', error);
     alert('خطأ: ' + error.message);
   } else {
-    loadComments(postId); // اعمل ريفريش للتعليقات
+    input.value = '';
+    loadComments(postId);
   }
 }
 
 async function loadComments(postId) {
   const { data } = await db.from('comments')
-   .select('id, content, created_at, user_id, profiles!inner(email, gender)')
-   .eq('post_id', postId)
-   .order('created_at', { ascending: true });
+  .select('id, content, created_at, user_id, profiles(email, gender)')
+  .eq('post_id', postId)
+  .order('created_at', { ascending: true });
 
   const list = document.getElementById(`list-${postId}`);
   if(!data || data.length === 0) {
