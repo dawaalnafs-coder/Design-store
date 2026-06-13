@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منصتي - شبكة تواصل</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="light">
@@ -98,7 +98,6 @@ function switchAuth(type) {
   document.getElementById('registerTab').classList.toggle('active', type === 'register');
 }
 
-// دارك مود محفوظ
 function initTheme() {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.body.className = savedTheme;
@@ -411,12 +410,26 @@ async function reportPost(id) {
 
 async function toggleLike(postId) {
   if(!user) return alert('سجل دخول الأول');
+  const post = allPosts.find(p => p.id === postId);
   const { data: existing } = await db.from('likes').select('*').eq('post_id', postId).eq('user_id', user.id).single();
+
   if(existing) {
     await db.from('likes').delete().eq('id', existing.id);
   } else {
     await db.from('likes').insert({post_id: postId, user_id: user.id});
     showNotification('❤️ تم اللايك');
+
+    // إشعار اللايك
+    if(post.user_id!== user.id) {
+      await db.from('notifications').insert({
+        user_id: post.user_id,
+        type: 'like',
+        post_id: postId,
+        from_user: user.id,
+        content: '',
+        read: false
+      });
+    }
   }
   loadLikes(postId);
 }
@@ -539,9 +552,9 @@ async function loadComments(postId) {
   list.innerHTML = '<small style="color:#999">جاري التحميل...</small>';
 
   const { data, error } = await db.from('comments')
- .select('id, content, created_at, user_id, parent_id, profiles(username, gender, last_seen)')
- .eq('post_id', postId)
- .order('created_at', { ascending: true });
+.select('id, content, created_at, user_id, parent_id, profiles(username, gender, last_seen)')
+.eq('post_id', postId)
+.order('created_at', { ascending: true });
 
   if(error) {
     list.innerHTML = '<small style="color:red">فشل التحميل</small>';
@@ -560,9 +573,9 @@ async function loadComments(postId) {
     let userData = c.profiles || {username: `مستخدم_${c.user_id.substring(0,6)}`, gender: 'M', last_seen: null};
     let avatarHTML = await avatar(c.user_id, userData.last_seen);
     let deleteBtn = (user.email === ADMIN_EMAIL || user.id === c.user_id)
-   ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
+  ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
     let editBtn = (user.id === c.user_id)
-   ? `<button class="btn-comment small" onclick="editComment(${c.id})">✏️</button>` : '';
+  ? `<button class="btn-comment small" onclick="editComment(${c.id})">✏️</button>` : '';
 
     let replies = data.filter(r => r.parent_id === c.id);
     let repliesHTML = '';
@@ -570,9 +583,9 @@ async function loadComments(postId) {
       let rUser = r.profiles || {username: `مستخدم_${r.user_id.substring(0,6)}`, gender: 'M', last_seen: null};
       let rAvatar = await avatar(r.user_id, rUser.last_seen);
       let rDeleteBtn = (user.email === ADMIN_EMAIL || user.id === r.user_id)
-     ? `<button class="btn-danger small" onclick="deleteComment(${r.id}, ${postId})">🗑️</button>` : '';
+    ? `<button class="btn-danger small" onclick="deleteComment(${r.id}, ${postId})">🗑️</button>` : '';
       let rEditBtn = (user.id === r.user_id)
-     ? `<button class="btn-comment small" onclick="editComment(${r.id})">✏️</button>` : '';
+    ? `<button class="btn-comment small" onclick="editComment(${r.id})">✏️</button>` : '';
 
       repliesHTML += `
         <div class="comment-item reply" id="comment-${r.id}">
@@ -615,14 +628,13 @@ async function loadComments(postId) {
   }
 }
 
+// نظام الإشعارات
 async function loadNotifications() {
   if(!user) return;
-  const { data, count } = await db.from('notifications')
-   .select('*', {count: 'exact'})
-   .eq('user_id', user.id)
-   .eq('read', false)
-   .order('created_at', {ascending: false})
-   .limit(10);
+  const { count } = await db.from('notifications')
+  .select('*', {count: 'exact'})
+  .eq('user_id', user.id)
+  .eq('read', false);
 
   const badge = document.getElementById('notifCount');
   if(count > 0) {
@@ -635,10 +647,10 @@ async function loadNotifications() {
 
 async function showNotifications() {
   const { data } = await db.from('notifications')
-   .select('*, profiles!from_user(username)')
-   .eq('user_id', user.id)
-   .order('created_at', {ascending: false})
-   .limit(10);
+  .select('*, profiles!from_user(username)')
+  .eq('user_id', user.id)
+  .order('created_at', {ascending: false})
+  .limit(10);
 
   if(!data || data.length === 0) {
     alert('لا توجد إشعارات');
@@ -648,7 +660,8 @@ async function showNotifications() {
   let msg = '🔔 الإشعارات:\n\n';
   data.forEach(n => {
     const from = n.profiles?.username || 'مستخدم';
-    msg += `${from}: رد عليك "${n.content}"\n`;
+    if(n.type === 'like') msg += `${from}: عمل لايك على منشورك\n`;
+    if(n.type === 'reply') msg += `${from}: رد عليك "${n.content}"\n`;
   });
   alert(msg);
 
@@ -703,6 +716,7 @@ window.addEventListener('load', async () => {
     showMain();
     loadPosts();
     subscribeRealtime();
+    loadNotifications();
   }
 });
 </script>
