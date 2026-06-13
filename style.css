@@ -4,6 +4,22 @@
   --pink: #e74c3c;
   --bg: #f5f7fa;
   --text: #2c3e50;
+  --card-bg: #ffffff;
+  --input-bg: #fafafa;
+  --border: #e8e8e8;
+  --comment-bg: #f8f9fa;
+  --whatsapp-bg: #f0f2f5;
+}
+
+/* دارك مود */
+body.dark {
+  --bg: #1a1a2e;
+  --text: #e0e0e0;
+  --card-bg: #16213e;
+  --input-bg: #0f3460;
+  --border: #2a2a4e;
+  --comment-bg: #0f3460;
+  --whatsapp-bg: #0f3460;
 }
 
 * {
@@ -16,34 +32,7 @@
 body {
   background: var(--bg);
   color: var(--text);
-  transition: background 0.3s;
-}
-
-/* دارك مود */
-body.dark {
-  --bg: #1a1a2e;
-  --text: #e0e0e0;
-}
-
-body.dark.card {
-  background: #16213e;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-}
-
-body.dark input,
-body.dark textarea,
-body.dark select {
-  background: #0f3460;
-  border-color: #2a2a4e;
-  color: #e0e0e0;
-}
-
-body.dark.whatsapp-input {
-  background: #0f3460;
-}
-
-body.dark.comment-item {
-  background: #0f3460;
+  transition: background 0.3s, color 0.3s;
 }
 
 .header {
@@ -66,29 +55,34 @@ body.dark.comment-item {
 }
 
 .card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 18px;
   padding: 22px;
   margin-bottom: 18px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-  transition: background 0.3s;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+body.dark .card {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
 }
 
 input, textarea, select {
   width: 100%;
   padding: 16px 18px;
-  border: 2px solid #e8e8e8;
+  border: 2px solid var(--border);
   border-radius: 14px;
   margin: 10px 0;
   font-size: 16px;
   transition: all 0.2s;
-  background: #fafafa;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--blue);
-  background: white;
+  background: var(--card-bg);
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
 }
 
@@ -131,15 +125,15 @@ button:hover {
 }
 
 .btn-like {
-  background: #fff0f0;
+  background: var(--card-bg);
   color: var(--pink);
-  border: 2px solid #ffe0e0;
+  border: 2px solid var(--border);
 }
 
 .btn-comment {
-  background: #f0f4ff;
+  background: var(--card-bg);
   color: var(--blue);
-  border: 2px solid #e0e7ff;
+  border: 2px solid var(--border);
 }
 
 .btn-comment.small {
@@ -148,9 +142,9 @@ button:hover {
 }
 
 .btn-save {
-  background: #f0fff4;
+  background: var(--card-bg);
   color: #27ae60;
-  border: 2px solid #d5f4e6;
+  border: 2px solid var(--border);
 }
 
 .btn-save.saved {
@@ -166,7 +160,7 @@ button:hover {
 .hidden { display: none!important; }
 
 .post-item {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border);
   padding: 20px 0;
 }
 
@@ -185,7 +179,8 @@ button:hover {
 }
 
 .post-meta {
-  color: #7f8c8d;
+  color: var(--text);
+  opacity: 0.7;
   font-size: 13px;
   margin-bottom: 12px;
   display: flex;
@@ -214,12 +209,13 @@ button:hover {
   height: 10px;
   background: #2ecc71;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid var(--card-bg);
 }
 
 .post-content {
   line-height: 1.8;
-  color: #444;
+  color: var(--text);
+  opacity: 0.9;
   margin: 12px 0;
   word-wrap: break-word;
 }
@@ -235,7 +231,7 @@ button:hover {
 .comments-box {
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 2px dashed #eee;
+  border-top: 2px dashed var(--border);
 }
 
 .whatsapp-input {
@@ -243,9 +239,10 @@ button:hover {
   gap: 8px;
   align-items: flex-end;
   padding: 6px 8px 6px 16px;
-  background: #f0f2f5;
+  background: var(--whatsapp-bg);
   border-radius: 25px;
   margin-bottom: 15px;
+  transition: background 0.3s;
 }
 
 .comment-field {
@@ -261,6 +258,7 @@ button:hover {
   resize: none;
   overflow-y: auto;
   margin: 0!important;
+  color: var(--text);
 }
 
 .whatsapp-input button {
@@ -291,8 +289,9 @@ button:hover {
   gap: 12px;
   padding: 12px;
   border-radius: 12px;
-  background: #f8f9fa;
+  background: var(--comment-bg);
   margin-bottom: 10px;
+  transition: background 0.3s;
 }
 
 .comment-body {
@@ -308,7 +307,8 @@ button:hover {
 }
 
 .comment-text {
-  color: #555;
+  color: var(--text);
+  opacity: 0.85;
   font-size: 14px;
   margin-bottom: 5px;
   word-wrap: break-word;
@@ -316,7 +316,8 @@ button:hover {
 
 .time-ago {
   font-size: 11px;
-  color: #999;
+  color: var(--text);
+  opacity: 0.6;
 }
 
 .alert {
@@ -350,13 +351,15 @@ button:hover {
 
 .tabs button {
   flex: 1;
-  background: #e8e8e8;
-  color: #666;
+  background: var(--border);
+  color: var(--text);
+  opacity: 0.7;
 }
 
 .tabs button.active {
   background: linear-gradient(135deg, var(--blue), var(--purple));
   color: white;
+  opacity: 1;
 }
 
 #themeBtn {
