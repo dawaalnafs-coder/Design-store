@@ -200,3 +200,34 @@ button:hover {
     padding: 0 8px;
   }
 }
+
+.badge {
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 7px;
+  font-size: 11px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-weight: bold;
+}
+#notifBtn { position: relative; }
+
+.notification {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--blue);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 9999;
+  animation: slideDown 0.3s;
+}
+@keyframes slideDown {
+  from { top: 40px; opacity: 0; }
+  to { top: 70px; opacity: 1; }
+}
