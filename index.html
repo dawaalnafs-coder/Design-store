@@ -132,18 +132,25 @@ async function handleRegister() {
 
   if(!email ||!password ||!username) return showAlert('authAlert', '❌ اكتب كل البيانات', 'error');
   if(!gender) return showAlert('authAlert', '❌ اختار الجنس', 'error');
+  if(password.length < 6) return showAlert('authAlert', '❌ الباسوورد 6 حروف على الأقل', 'error');
 
   const { data, error } = await db.auth.signUp({ email, password });
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
   if(data.user) {
-    await db.from('profiles').insert({
+    // السطرين دول أهم حاجة - لازم نضيف في profiles
+    const { error: profileError } = await db.from('profiles').insert({
       id: data.user.id,
       username: username,
       gender: gender,
       created_at: new Date(),
       last_seen: new Date()
     });
+
+    if(profileError) {
+      console.error('Profile error:', profileError);
+      return showAlert('authAlert', '❌ خطأ في إنشاء البروفايل', 'error');
+    }
   }
 
   showAlert('authAlert', '✅ تم التسجيل! تقدر تدخل دلوقتي', 'success');
