@@ -204,12 +204,12 @@ async function loadPosts() {
           <button class="btn-comment" onclick="toggleComments(${p.id})">💬 تعليقات</button>
         </div>
         <div id="comments-${p.id}" class="comments-box hidden">
-          <div class="comment-input">
-            <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1" class="comment-field"></textarea>
-            <button onclick="addComment(${p.id})" class="btn-send">📤</button>
-          </div>
-          <div id="list-${p.id}" class="comments-list"></div>
-        </div>
+  <div class="whatsapp-input">
+    <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1"></textarea>
+    <button onclick="addComment(${p.id})">ᯓ➤</button>
+  </div>
+  <div id="list-${p.id}" class="comments-list"></div>
+</div>
       </div>
     `;
   }
