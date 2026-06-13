@@ -470,12 +470,11 @@ async function addComment(postId, parentId) {
   if(error) {
     alert('خطأ: ' + error.message);
   } else {
-} else {
     input.value = '';
     input.style.height = 'auto';
     if(parentId) document.getElementById(`reply-box-${parentId}`)?.remove();
 
-    // 1. إشعار للرد على تعليق
+    // 1. إشعار للرد على تعليق - ده موجود عندك
     if(parentId) {
       const { data: parent } = await db.from('comments').select('user_id').eq('id', parentId).single();
       if(parent && parent.user_id!== user.id) {
@@ -491,9 +490,9 @@ async function addComment(postId, parentId) {
       }
     }
 
-    // 2. إشعار لصاحب البوست - عدلت allPosts هنا
+    // 2. إشعار لصاحب البوست - ضيف ده
     else {
-      const post = allPosts.find(p => p.id === postId); // posts ❌ -> allPosts ✅
+      const post = posts.find(p => p.id === postId);
       if(post && post.user_id !== user.id) {
         await db.from('notifications').insert({
           user_id: post.user_id,
@@ -508,7 +507,6 @@ async function addComment(postId, parentId) {
     }
 
     loadComments(postId);
-    loadNotifications(); // ضفت دي عشان العداد يظهر فوراً ✅
     showNotification(parentId? '💬 تم الرد' : '💬 تم التعليق');
   }
 }
