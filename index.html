@@ -50,7 +50,7 @@
     <div class="card" id="postBox">
       <h4>📝 منشور جديد</h4>
       <input type="text" id="postTitle" placeholder="العنوان">
-      <textarea id="postContent" placeholder="المحتوى..." rows="3"></textarea>
+      <textarea id="postContent" placeholder="المحتوى..." rows="5" class="big-textarea"></textarea>
       <button class="btn-primary" onclick="createPost()">نشر</button>
       <div id="postAlert" class="alert"></div>
     </div>
@@ -69,7 +69,7 @@
 
 <script>
 const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'    
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
@@ -92,34 +92,29 @@ async function handleRegister() {
   if(!gender) return showAlert('authAlert', '❌ اختار الجنس', 'error');
 
   const { data, error } = await db.auth.signUp({ email, password });
-
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
   if(data.user) {
     await db.from('profiles').insert({ id: data.user.id, gender: gender, username: username });
   }
-
   showAlert('authAlert', '✅ تم التسجيل! شيك على إيميلك وفعّل الحساب', 'success');
 }
 
 async function handleLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-
   if(!email ||!password) return showAlert('authAlert', '❌ اكتب الإيميل والباسوورد', 'error');
 
   const { data, error } = await db.auth.signInWithPassword({ email, password });
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
   user = data.user;
-
   const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
   if(banned) {
     await db.auth.signOut();
     user = null;
     return showAlert('authAlert', '🚫 حسابك محظور. السبب: ' + banned.reason, 'error');
   }
-
   showMain();
   loadPosts();
 }
@@ -135,7 +130,6 @@ function showMain() {
   document.getElementById('authSection').classList.add('hidden');
   document.getElementById('mainSection').classList.remove('hidden');
   document.getElementById('userEmail').textContent = user.email;
-
   if(user.email === ADMIN_EMAIL) {
     document.getElementById('adminPanel').classList.remove('hidden');
   }
@@ -143,7 +137,6 @@ function showMain() {
 
 async function createPost() {
   if(!user) return alert('سجل دخول الأول');
-
   const title = document.getElementById('postTitle').value.trim();
   const content = document.getElementById('postContent').value.trim();
   if(!title ||!content) return showAlert('postAlert', '❌ اكتب عنوان ومحتوى', 'error');
@@ -151,7 +144,6 @@ async function createPost() {
   const { error } = await db.from('posts').insert({
     title, content, author: user.email, user_id: user.id
   });
-
   if(error) return showAlert('postAlert', '❌ خطأ: ' + error.message, 'error');
 
   document.getElementById('postTitle').value = '';
@@ -185,7 +177,6 @@ function timeAgo(date) {
 
 async function loadPosts() {
   if(!user) return;
-
   const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
   const list = document.getElementById('postsList');
 
@@ -214,8 +205,8 @@ async function loadPosts() {
         </div>
         <div id="comments-${p.id}" class="comments-box hidden">
           <div class="comment-input">
-            <input id="input-${p.id}" placeholder="اكتب تعليق...">
-            <button class="btn-primary" onclick="addComment(${p.id})">إرسال</button>
+            <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1" class="comment-field"></textarea>
+            <button onclick="addComment(${p.id})" class="btn-send">📤</button>
           </div>
           <div id="list-${p.id}" class="comments-list"></div>
         </div>
@@ -223,7 +214,6 @@ async function loadPosts() {
     `;
   }
   list.innerHTML = html;
-
   data.forEach(p => loadLikes(p.id));
 }
 
@@ -244,9 +234,7 @@ async function reportPost(id) {
 
 async function toggleLike(postId) {
   if(!user) return alert('سجل دخول الأول');
-
   const { data: existing } = await db.from('likes').select('*').eq('post_id', postId).eq('user_id', user.id).single();
-
   if(existing) {
     await db.from('likes').delete().eq('id', existing.id);
   } else {
@@ -269,10 +257,8 @@ function toggleComments(postId) {
 
 async function addComment(postId) {
   if(!user) return alert('سجل دخول الأول');
-
   const input = document.getElementById(`input-${postId}`);
   const commentText = input.value.trim();
-
   if(!commentText) return alert('اكتب تعليق الأول');
 
   const { error } = await db.from('comments').insert({
@@ -285,6 +271,7 @@ async function addComment(postId) {
     alert('خطأ: ' + error.message);
   } else {
     input.value = '';
+    input.style.height = 'auto';
     loadComments(postId);
   }
 }
@@ -297,17 +284,15 @@ async function deleteComment(commentId, postId) {
 
 async function loadComments(postId) {
   const { data, error } = await db.from('comments')
-   .select('id, content, created_at, user_id, profiles(username, gender)') // هنا زودنا username
-   .eq('post_id', postId)
-   .order('created_at', { ascending: true });
+  .select('id, content, created_at, user_id, profiles(username, gender)')
+  .eq('post_id', postId)
+  .order('created_at', { ascending: true });
 
   const list = document.getElementById(`list-${postId}`);
-
   if (error) {
     list.innerHTML = '<small style="color:red">خطأ في تحميل التعليقات</small>';
     return;
   }
-
   if(!data || data.length === 0) {
     list.innerHTML = '<small style="color:#999">لا توجد تعليقات بعد</small>';
     return;
@@ -318,8 +303,7 @@ async function loadComments(postId) {
     let userData = c.profiles || {username: 'مجهول', gender: 'M'};
     let avatarHTML = await avatar(c.user_id);
     let deleteBtn = (user.email === ADMIN_EMAIL || user.id === c.user_id)
-    ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>`
-      : '';
+   ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
 
     commentsHTML += `
       <div class="comment-item">
@@ -346,17 +330,23 @@ function showAlert(id, msg, type) {
   setTimeout(() => el.style.display = 'none', 3000);
 }
 
+// تكبير خانة التعليق أوتوماتيك زي واتساب
+document.addEventListener('input', e => {
+  if(e.target.matches('.comment-field')) {
+    e.target.style.height = 'auto';
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+  }
+});
+
 window.addEventListener('load', async () => {
   const { data } = await db.auth.getSession();
   if(data.session) {
     user = data.session.user;
-
     const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
     if(banned) {
       await db.auth.signOut();
       return;
     }
-
     showMain();
     loadPosts();
   }
