@@ -474,7 +474,7 @@ async function addComment(postId, parentId) {
     input.style.height = 'auto';
     if(parentId) document.getElementById(`reply-box-${parentId}`)?.remove();
 
-    // إشعار للرد
+    // 1. إشعار للرد على تعليق - ده موجود عندك
     if(parentId) {
       const { data: parent } = await db.from('comments').select('user_id').eq('id', parentId).single();
       if(parent && parent.user_id!== user.id) {
@@ -483,6 +483,22 @@ async function addComment(postId, parentId) {
           type: 'reply',
           post_id: postId,
           comment_id: parentId,
+          from_user: user.id,
+          content: commentText.substring(0, 30) + '...',
+          read: false
+        });
+      }
+    }
+
+    // 2. إشعار لصاحب البوست - ضيف ده
+    else {
+      const post = posts.find(p => p.id === postId);
+      if(post && post.user_id !== user.id) {
+        await db.from('notifications').insert({
+          user_id: post.user_id,
+          type: 'comment',
+          post_id: postId,
+          comment_id: newComment.id,
           from_user: user.id,
           content: commentText.substring(0, 30) + '...',
           read: false
