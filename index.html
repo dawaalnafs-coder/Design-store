@@ -4,35 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منصتي - شبكة تواصل</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Tajawal',sans-serif}
-body{background:#f5f7fa;color:#333}
-.header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-.container{max-width:800px;margin:20px auto;padding:0 15px}
-.card{background:white;border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
-input,textarea,select{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:8px;margin:8px 0;font-size:14px}
-input:focus,textarea:focus,select:focus{outline:none;border-color:#667eea}
-button{background:#667eea;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px 0}
-button:hover{opacity:0.9}
-button.danger{background:#e74c3c}
-button.warn{background:#f39c12}
-.hidden{display:none}
-.post-item{border-bottom:1px solid #eee;padding:15px 0}
-.post-title{font-weight:bold;font-size:18px;margin-bottom:5px}
-.post-meta{color:#777;font-size:12px;margin-bottom:8px;display:flex;align-items:center}
-.post-content{line-height:1.6}
-.post-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-.alert{padding:12px;border-radius:8px;margin:10px 0;display:none}
-.alert.success{background:#d4edda;color:#155724}
-.alert.error{background:#f8d7da;color:#721c24}
-.auth-box{max-width:400px;margin:50px auto}
-.tabs{display:flex;gap:10px;margin-bottom:20px}
-.tabs button{flex:1;background:#ddd;color:#333}
-.tabs button.active{background:#667eea;color:white}
-.comment-item{margin-bottom:10px;padding:8px;border-radius:8px;background:#f8f9fa}
-.time-ago{font-size:11px;color:#999}
-</style>
 </head>
 <body>
 
@@ -46,7 +20,7 @@ button.warn{background:#f39c12}
   <div id="loginForm">
     <input type="email" id="loginEmail" placeholder="الإيميل">
     <input type="password" id="loginPassword" placeholder="كلمة المرور">
-    <button onclick="handleLogin()" style="width:100%">دخول</button>
+    <button class="btn-primary" onclick="handleLogin()">دخول</button>
   </div>
 
   <div id="registerForm" class="hidden">
@@ -58,7 +32,7 @@ button.warn{background:#f39c12}
       <option value="M">ذكر</option>
       <option value="F">أنثى</option>
     </select>
-    <button onclick="handleRegister()" style="width:100%">إنشاء حساب</button>
+    <button class="btn-primary" onclick="handleRegister()">إنشاء حساب</button>
   </div>
   <div id="authAlert" class="alert"></div>
 </div>
@@ -66,9 +40,9 @@ button.warn{background:#f39c12}
 <div id="mainSection" class="hidden">
   <div class="header">
     <h3>منصتي 🛒</h3>
-    <div>
+    <div style="display:flex;align-items:center;gap:10px">
       <span id="userEmail"></span>
-      <button onclick="handleLogout()" style="background:#e74c3c;margin-right:10px">خروج</button>
+      <button class="btn-danger" onclick="handleLogout()">خروج</button>
     </div>
   </div>
 
@@ -77,7 +51,7 @@ button.warn{background:#f39c12}
       <h4>📝 منشور جديد</h4>
       <input type="text" id="postTitle" placeholder="العنوان">
       <textarea id="postContent" placeholder="المحتوى..." rows="3"></textarea>
-      <button onclick="createPost()" style="width:100%">نشر</button>
+      <button class="btn-primary" onclick="createPost()">نشر</button>
       <div id="postAlert" class="alert"></div>
     </div>
 
@@ -95,7 +69,7 @@ button.warn{background:#f39c12}
 
 <script>
 const supabaseUrl = 'https://pbadwhwdodhwutuzjwuz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiYWR3aHdkb2Rod3V0dXpqd3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDEzOTYsImV4cCI6MjA5NTcxNzM5Nn0.WVtppUQRzy6Fk0KyAlEosP8OBqNPdFPfCQMN0zvDWTk'    
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
@@ -194,8 +168,8 @@ async function getUserData(userId) {
 async function avatar(userId) {
   let userData = await getUserData(userId);
   let letter = userData.username? userData.username[0].toUpperCase() : 'U';
-  let color = userData.gender === 'F'? '#e74c3c' : '#3498db';
-  return `<div style="width:32px;height:32px;border-radius:50%;background:${color};color:white;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;margin-left:8px;font-size:14px">${letter}</div>`;
+  let color = userData.gender === 'F'? 'var(--pink)' : 'var(--blue)';
+  return `<div class="avatar" style="background:${color}">${letter}</div>`;
 }
 
 function timeAgo(date) {
@@ -216,7 +190,7 @@ async function loadPosts() {
   const list = document.getElementById('postsList');
 
   if(!data || data.length === 0) {
-    list.innerHTML = 'لا توجد منشورات بعد';
+    list.innerHTML = '<div style="text-align:center;color:#999;padding:20px">لا توجد منشورات بعد</div>';
     return;
   }
 
@@ -228,20 +202,22 @@ async function loadPosts() {
     html += `
       <div class="post-item">
         <div class="post-title">${p.title}</div>
-        <div class="post-meta">${avatarHTML} 👤 ${userData.username} | ${timeAgo(p.created_at)}</div>
+        <div class="post-meta">${avatarHTML} <b>${userData.username}</b> | ${timeAgo(p.created_at)}</div>
         <div class="post-content">${p.content}</div>
         <div class="post-actions">
           ${user.email === ADMIN_EMAIL || user.id === p.user_id?
-            `<button class="danger" onclick="deletePost(${p.id})">🗑️ حذف</button>` : ''}
+            `<button class="btn-danger" onclick="deletePost(${p.id})">🗑️ حذف</button>` : ''}
           ${user.email!== ADMIN_EMAIL?
-            `<button class="warn" onclick="reportPost(${p.id})">🚩 إبلاغ</button>` : ''}
-          <button onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
-          <span style="cursor:pointer;color:#667eea" onclick="toggleComments(${p.id})">💬 تعليقات</span>
+            `<button class="btn-warn" onclick="reportPost(${p.id})">🚩 إبلاغ</button>` : ''}
+          <button class="btn-like" onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
+          <button class="btn-comment" onclick="toggleComments(${p.id})">💬 تعليقات</button>
         </div>
-        <div id="comments-${p.id}" style="display:none;margin-top:10px">
-          <input id="input-${p.id}" placeholder="اكتب تعليق..." style="width:70%;padding:5px">
-          <button onclick="addComment(${p.id})">إرسال</button>
-          <div id="list-${p.id}" style="margin-top:10px"></div>
+        <div id="comments-${p.id}" class="comments-box hidden">
+          <div class="comment-input">
+            <input id="input-${p.id}" placeholder="اكتب تعليق...">
+            <button class="btn-primary" onclick="addComment(${p.id})">إرسال</button>
+          </div>
+          <div id="list-${p.id}" class="comments-list"></div>
         </div>
       </div>
     `;
@@ -287,8 +263,8 @@ async function loadLikes(postId) {
 
 function toggleComments(postId) {
   const div = document.getElementById(`comments-${postId}`);
-  div.style.display = div.style.display === 'none'? 'block' : 'none';
-  if(div.style.display === 'block') loadComments(postId);
+  div.classList.toggle('hidden');
+  if(!div.classList.contains('hidden')) loadComments(postId);
 }
 
 async function addComment(postId) {
@@ -321,9 +297,9 @@ async function deleteComment(commentId, postId) {
 
 async function loadComments(postId) {
   const { data, error } = await db.from('comments')
-.select('id, content, created_at, user_id, profiles(gender)')
-.eq('post_id', postId)
-.order('created_at', { ascending: true });
+   .select('id, content, created_at, user_id, profiles(username, gender)') // هنا زودنا username
+   .eq('post_id', postId)
+   .order('created_at', { ascending: true });
 
   const list = document.getElementById(`list-${postId}`);
 
@@ -342,18 +318,18 @@ async function loadComments(postId) {
     let userData = c.profiles || {username: 'مجهول', gender: 'M'};
     let avatarHTML = await avatar(c.user_id);
     let deleteBtn = (user.email === ADMIN_EMAIL || user.id === c.user_id)
-     ? `<button onclick="deleteComment(${c.id}, ${postId})" style="background:#e74c3c;padding:4px 8px;font-size:12px;margin-right:5px">🗑️</button>`
+    ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>`
       : '';
 
     commentsHTML += `
-      <div class="comment-item" style="display:flex;align-items:center;gap:8px">
+      <div class="comment-item">
         ${avatarHTML}
-        <div style="flex:1">
-          <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="comment-body">
+          <div class="comment-head">
             <b>${userData.username}</b>
             ${deleteBtn}
           </div>
-          <small style="color:#555">${c.content}</small><br>
+          <div class="comment-text">${c.content}</div>
           <span class="time-ago">${timeAgo(c.created_at)}</span>
         </div>
       </div>
