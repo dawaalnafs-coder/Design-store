@@ -396,17 +396,29 @@ async function addComment(postId, parentId) {
   }
 }
 
-function replyTo(commentId, username) {
-  const box = document.getElementById(`reply-box-${commentId}`);
-  if(box) return box.remove();
+function showReplyBox(commentId, btn) {
+  const existing = document.getElementById(`reply-box-${commentId}`);
+  if(existing) {
+    existing.remove();
+    btn.textContent = 'رد';
+    return;
+  }
 
+  document.querySelectorAll('[id^="reply-box-"]').forEach(el => el.remove());
+  document.querySelectorAll('.reply-btn').forEach(b => b.textContent = 'رد');
+
+  btn.textContent = 'إلغاء';
+
+  const postId = btn.closest('.post-item').querySelector('[id^="comments-"]').id.replace('comments-', '');
+  
   const html = `
     <div id="reply-box-${commentId}" class="whatsapp-input" style="margin-top:8px;margin-right:50px">
-      <textarea id="reply-${commentId}" placeholder="رد على ${username}..." rows="1" class="comment-field"></textarea>
-      <button onclick="addComment(${null}, ${commentId})">ᯓ➤</button>
+      <textarea id="reply-${commentId}" placeholder="اكتب ردك..." rows="1" class="comment-field"></textarea>
+      <button onclick="addComment(${postId}, ${commentId})">ᯓ➤</button>
     </div>
   `;
   document.getElementById(`comment-${commentId}`).insertAdjacentHTML('afterend', html);
+  document.getElementById(`reply-${commentId}`).focus();
 }
 
 async function deleteComment(commentId, postId) {
@@ -474,7 +486,7 @@ async function loadComments(postId) {
         <div class="comment-head">
           <b>${userData.username}</b>
           <div style="display:flex;gap:5px">
-            <button class="btn-comment small" onclick="replyTo(${c.id}, '${userData.username}')">رد</button>
+            <button class="btn-comment small" onclick="showReplyBox(${c.id}, this)">رد</button>
             ${deleteBtn}
           </div>
         </div>
