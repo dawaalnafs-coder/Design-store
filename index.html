@@ -10,6 +10,8 @@
 </head>
 <body>
 
+<div id="notification" class="notification hidden"></div>
+
 <div id="authSection" class="auth-box card">
   <h2 style="text-align:center;margin-bottom:20px">مرحباً بك في منصتي 🤝</h2>
   <div class="tabs">
@@ -41,6 +43,8 @@
   <div class="header">
     <h3>منصتي 🛒</h3>
     <div style="display:flex;align-items:center;gap:10px">
+      <button id="themeBtn" onclick="toggleTheme()">🌙</button>
+      <button id="savedBtn" onclick="showSaved()">📌 المحفوظات</button>
       <span id="userEmail"></span>
       <button class="btn-danger" onclick="handleLogout()">خروج</button>
     </div>
@@ -51,11 +55,19 @@
       <h4>📝 منشور جديد</h4>
       <input type="text" id="postTitle" placeholder="العنوان">
       <textarea id="postContent" placeholder="المحتوى..." rows="5" class="big-textarea"></textarea>
+
+      <div style="display:flex;gap:10px;align-items:center;margin:10px 0">
+        <input type="file" id="postImage" accept="image/*" style="display:none">
+        <button type="button" onclick="document.getElementById('postImage').click()">📷 صورة</button>
+        <span id="imageName" style="font-size:13px;color:#999"></span>
+      </div>
+
       <button class="btn-primary" onclick="createPost()">نشر</button>
       <div id="postAlert" class="alert"></div>
     </div>
 
     <div class="card">
+      <input type="text" id="searchInput" placeholder="🔍 ابحث عن منشور..." oninput="searchPosts()">
       <h4>📋 المنشورات</h4>
       <div id="postsList">جاري التحميل...</div>
     </div>
@@ -73,6 +85,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
+let allPosts = [];
 const ADMIN_EMAIL = 'dawaahafs@gmail.com';
 
 function switchAuth(type) {
@@ -80,6 +93,22 @@ function switchAuth(type) {
   document.getElementById('registerForm').classList.toggle('hidden', type!== 'register');
   document.getElementById('loginTab').classList.toggle('active', type === 'login');
   document.getElementById('registerTab').classList.toggle('active', type === 'register');
+}
+
+// دارك مود
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = document.body.classList.contains('dark')? '☀️' : '🌙';
+  localStorage.setItem('theme', document.body.classList.contains('dark')? 'dark' : 'light');
+}
+
+// إشعار
+function showNotification(msg) {
+  const n = document.getElementById('notification');
+  n.textContent = msg;
+  n.classList.remove('hidden');
+  setTimeout(() => n.classList.add('hidden'), 3000);
 }
 
 async function handleRegister() {
@@ -95,9 +124,9 @@ async function handleRegister() {
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
   if(data.user) {
-    await db.from('profiles').insert({ id: data.user.id, gender: gender, username: username });
+    await db.from('profiles').insert({ id: data.user.id, gender: gender, username: username, last_seen: new Date() });
   }
-  showAlert('authAlert', '✅ تم التسجيل! شيك على إيميلك وفعّل الحساب', 'success');
+  showAlert('authAlert', '✅ تم التسجيل! شيك على إيميلك', 'success');
 }
 
 async function handleLogin() {
@@ -109,6 +138,8 @@ async function handleLogin() {
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
   user = data.user;
+  await db.from('profiles').update({last_seen: new Date()}).eq('id', user.id);
+
   const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
   if(banned) {
     await db.auth.signOut();
@@ -117,9 +148,11 @@ async function handleLogin() {
   }
   showMain();
   loadPosts();
+  subscribeRealtime();
 }
 
 async function handleLogout() {
+  await db.from('profiles').update({last_seen: new Date()}).eq('id', user.id);
   await db.auth.signOut();
   user = null;
   document.getElementById('authSection').classList.remove('hidden');
@@ -130,6 +163,10 @@ function showMain() {
   document.getElementById('authSection').classList.add('hidden');
   document.getElementById('mainSection').classList.remove('hidden');
   document.getElementById('userEmail').textContent = user.email;
+  if(localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '☀️';
+  }
   if(user.email === ADMIN_EMAIL) {
     document.getElementById('adminPanel').classList.remove('hidden');
   }
@@ -139,73 +176,102 @@ async function createPost() {
   if(!user) return alert('سجل دخول الأول');
   const title = document.getElementById('postTitle').value.trim();
   const content = document.getElementById('postContent').value.trim();
+  const imageFile = document.getElementById('postImage').files[0];
+
   if(!title ||!content) return showAlert('postAlert', '❌ اكتب عنوان ومحتوى', 'error');
 
+  let imageUrl = null;
+  if(imageFile) {
+    const fileName = `${user.id}/${Date.now()}_${imageFile.name}`;
+    const { data, error } = await db.storage.from('posts').upload(fileName, imageFile);
+    if(!error) {
+      const { data: urlData } = db.storage.from('posts').getPublicUrl(fileName);
+      imageUrl = urlData.publicUrl;
+    }
+  }
+
   const { error } = await db.from('posts').insert({
-    title, content, author: user.email, user_id: user.id
+    title, content, author: user.email, user_id: user.id, image_url: imageUrl, saved_by: []
   });
   if(error) return showAlert('postAlert', '❌ خطأ: ' + error.message, 'error');
 
   document.getElementById('postTitle').value = '';
   document.getElementById('postContent').value = '';
+  document.getElementById('postImage').value = '';
+  document.getElementById('imageName').textContent = '';
   showAlert('postAlert', '✅ تم النشر بنجاح', 'success');
   loadPosts();
 }
 
 async function getUserData(userId) {
-  const { data } = await db.from('profiles').select('gender, username').eq('id', userId).single();
-  return data || {gender: 'M', username: 'مجهول'};
+  const { data } = await db.from('profiles').select('gender, username, last_seen').eq('id', userId).single();
+  return data || {gender: 'M', username: 'مجهول', last_seen: null};
 }
 
-async function avatar(userId) {
+async function avatar(userId, lastSeen) {
   let userData = await getUserData(userId);
   let letter = userData.username? userData.username[0].toUpperCase() : 'U';
   let color = userData.gender === 'F'? 'var(--pink)' : 'var(--blue)';
-  return `<div class="avatar" style="background:${color}">${letter}</div>`;
+  let online = lastSeen && (new Date() - new Date(lastSeen)) < 60000;
+  return `<div class="avatar" style="background:${color}">${letter}${online? '<span class="online-dot"></span>' : ''}</div>`;
 }
 
-// ===== تعديل التاريخ عشان مصر +2 =====
 function timeAgo(date) {
   const now = new Date();
   const postDate = new Date(date);
-  // مصر +2 ساعات
   const diffMs = now.getTime() - postDate.getTime() - (2 * 60 * 60 * 1000);
-
   const seconds = Math.floor(diffMs / 1000);
   if(seconds < 60) return 'الآن';
-
   const minutes = Math.floor(seconds / 60);
   if(minutes < 60) return `منذ ${minutes} دقيقة`;
-
   const hours = Math.floor(minutes / 60);
   if(hours < 24) return `منذ ${hours} ساعة`;
-
   const days = Math.floor(hours / 24);
   if(days < 30) return `منذ ${days} يوم`;
-
   return postDate.toLocaleDateString('ar-EG');
+}
+
+function searchPosts() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allPosts.filter(p =>
+    p.title.toLowerCase().includes(query) ||
+    p.content.toLowerCase().includes(query)
+  );
+  renderPosts(filtered);
+}
+
+async function showSaved() {
+  const saved = allPosts.filter(p => p.saved_by?.includes(user.id));
+  renderPosts(saved);
+  showNotification('📌 عرض المنشورات المحفوظة');
 }
 
 async function loadPosts() {
   if(!user) return;
   const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
-  const list = document.getElementById('postsList');
+  allPosts = data || [];
+  renderPosts(allPosts);
+}
 
+async function renderPosts(data) {
+  const list = document.getElementById('postsList');
   if(!data || data.length === 0) {
-    list.innerHTML = '<div style="text-align:center;color:#999;padding:20px">لا توجد منشورات بعد</div>';
+    list.innerHTML = '<div style="text-align:center;color:#999;padding:20px">لا توجد منشورات</div>';
     return;
   }
 
   let html = '';
   for(let p of data) {
     let userData = await getUserData(p.user_id);
-    let avatarHTML = await avatar(p.user_id);
+    let avatarHTML = await avatar(p.user_id, userData.last_seen);
+    let isSaved = p.saved_by?.includes(user.id);
 
     html += `
       <div class="post-item">
         <div class="post-title">${p.title}</div>
         <div class="post-meta">${avatarHTML} <b>${userData.username}</b> | ${timeAgo(p.created_at)}</div>
         <div class="post-content">${p.content}</div>
+        ${p.image_url? `<img src="${p.image_url}" class="post-image">` : ''}
         <div class="post-actions">
           ${user.email === ADMIN_EMAIL || user.id === p.user_id?
             `<button class="btn-danger" onclick="deletePost(${p.id})">🗑️ حذف</button>` : ''}
@@ -213,11 +279,12 @@ async function loadPosts() {
             `<button class="btn-warn" onclick="reportPost(${p.id})">🚩 إبلاغ</button>` : ''}
           <button class="btn-like" onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
           <button class="btn-comment" onclick="toggleComments(${p.id})">💬 تعليقات</button>
+          <button class="btn-save ${isSaved? 'saved' : ''}" onclick="toggleSave(${p.id})">${isSaved? '📌 محفوظ' : '📌 حفظ'}</button>
         </div>
         <div id="comments-${p.id}" class="comments-box hidden">
           <div class="whatsapp-input">
             <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1" class="comment-field"></textarea>
-            <button onclick="addComment(${p.id})">ᯓ➤</button>
+            <button onclick="addComment(${p.id}, null)">ᯓ➤</button>
           </div>
           <div id="list-${p.id}" class="comments-list"></div>
         </div>
@@ -226,6 +293,21 @@ async function loadPosts() {
   }
   list.innerHTML = html;
   data.forEach(p => loadLikes(p.id));
+}
+
+async function toggleSave(postId) {
+  const post = allPosts.find(p => p.id === postId);
+  let savedBy = post.saved_by || [];
+
+  if(savedBy.includes(user.id)) {
+    savedBy = savedBy.filter(id => id!== user.id);
+  } else {
+    savedBy.push(user.id);
+    showNotification('📌 تم حفظ المنشور');
+  }
+
+  await db.from('posts').update({saved_by: savedBy}).eq('id', postId);
+  loadPosts();
 }
 
 async function deletePost(id) {
@@ -240,7 +322,7 @@ async function reportPost(id) {
   if(!user) return;
   const { error } = await db.from('reports').insert({ post_id: id, reporter_id: user.id });
   if(error) return alert('أبلغت عنه قبل كده');
-  alert('✅ تم الإبلاغ. الأدمن هيراجع المنشور');
+  alert('✅ تم الإبلاغ. الأدمن هيراجع');
 }
 
 async function toggleLike(postId) {
@@ -250,6 +332,7 @@ async function toggleLike(postId) {
     await db.from('likes').delete().eq('id', existing.id);
   } else {
     await db.from('likes').insert({post_id: postId, user_id: user.id});
+    showNotification('❤️ تم اللايك');
   }
   loadLikes(postId);
 }
@@ -266,16 +349,18 @@ function toggleComments(postId) {
   if(!div.classList.contains('hidden')) loadComments(postId);
 }
 
-async function addComment(postId) {
+async function addComment(postId, parentId) {
   if(!user) return alert('سجل دخول الأول');
-  const input = document.getElementById(`input-${postId}`);
+  const inputId = parentId? `reply-${parentId}` : `input-${postId}`;
+  const input = document.getElementById(inputId);
   const commentText = input.value.trim();
   if(!commentText) return alert('اكتب تعليق الأول');
 
   const { error } = await db.from('comments').insert({
     post_id: postId,
     content: commentText,
-    user_id: user.id
+    user_id: user.id,
+    parent_id: parentId
   });
 
   if(error) {
@@ -283,8 +368,23 @@ async function addComment(postId) {
   } else {
     input.value = '';
     input.style.height = 'auto';
+    if(parentId) document.getElementById(`reply-box-${parentId}`).remove();
     loadComments(postId);
+    if(user.email!== user.email) showNotification('💬 تعليق جديد');
   }
+}
+
+function replyTo(commentId, username) {
+  const box = document.getElementById(`reply-box-${commentId}`);
+  if(box) return box.remove();
+
+  const html = `
+    <div id="reply-box-${commentId}" class="whatsapp-input" style="margin-top:8px;margin-right:50px">
+      <textarea id="reply-${commentId}" placeholder="رد على ${username}..." rows="1" class="comment-field"></textarea>
+      <button onclick="addComment(null, ${commentId})">ᯓ➤</button>
+    </div>
+  `;
+  document.getElementById(`comment-${commentId}`).insertAdjacentHTML('afterend', html);
 }
 
 async function deleteComment(commentId, postId) {
@@ -294,16 +394,12 @@ async function deleteComment(commentId, postId) {
 }
 
 async function loadComments(postId) {
-  const { data, error } = await db.from('comments')
- .select('id, content, created_at, user_id, profiles(username, gender)')
- .eq('post_id', postId)
- .order('created_at', { ascending: true });
+  const { data } = await db.from('comments')
+   .select('id, content, created_at, user_id, parent_id, profiles(username, gender, last_seen)')
+   .eq('post_id', postId)
+   .order('created_at', { ascending: true });
 
   const list = document.getElementById(`list-${postId}`);
-  if (error) {
-    list.innerHTML = '<small style="color:red">خطأ في تحميل التعليقات</small>';
-    return;
-  }
   if(!data || data.length === 0) {
     list.innerHTML = '<small style="color:#999">لا توجد تعليقات بعد</small>';
     return;
@@ -311,21 +407,47 @@ async function loadComments(postId) {
 
   let commentsHTML = '';
   for(let c of data) {
-    let userData = c.profiles || {username: 'مجهول', gender: 'M'};
-    let avatarHTML = await avatar(c.user_id);
+    if(c.parent_id) continue; // هنعرض الردود تحتها
+    let userData = c.profiles || {username: 'مجهول', gender: 'M', last_seen: null};
+    let avatarHTML = await avatar(c.user_id, userData.last_seen);
     let deleteBtn = (user.email === ADMIN_EMAIL || user.id === c.user_id)
-  ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
+     ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
+
+    let replies = data.filter(r => r.parent_id === c.id);
+    let repliesHTML = '';
+    for(let r of replies) {
+      let rUser = r.profiles || {username: 'مجهول', gender: 'M', last_seen: null};
+      let rAvatar = await avatar(r.user_id, rUser.last_seen);
+      repliesHTML += `
+        <div class="comment-item" style="margin-right:40px;margin-top:8px">
+          ${rAvatar}
+          <div class="comment-body">
+            <div class="comment-head">
+              <b>${rUser.username}</b>
+              ${(user.email === ADMIN_EMAIL || user.id === r.user_id)
+               ? `<button class="btn-danger small" onclick="deleteComment(${r.id}, ${postId})">🗑️</button>` : ''}
+            </div>
+            <div class="comment-text">${r.content}</div>
+            <span class="time-ago">${timeAgo(r.created_at)}</span>
+          </div>
+        </div>
+      `;
+    }
 
     commentsHTML += `
-      <div class="comment-item">
+      <div id="comment-${c.id}" class="comment-item">
         ${avatarHTML}
         <div class="comment-body">
           <div class="comment-head">
             <b>${userData.username}</b>
-            ${deleteBtn}
+            <div style="display:flex;gap:5px">
+              <button class="btn-comment small" onclick="replyTo(${c.id}, '${userData.username}')">رد</button>
+              ${deleteBtn}
+            </div>
           </div>
           <div class="comment-text">${c.content}</div>
           <span class="time-ago">${timeAgo(c.created_at)}</span>
+          ${repliesHTML}
         </div>
       </div>
     `;
@@ -341,13 +463,32 @@ function showAlert(id, msg, type) {
   setTimeout(() => el.style.display = 'none', 3000);
 }
 
-// تكبير خانة التعليق أوتوماتيك - عدلت الـ class
+// تكبير الخانة
 document.addEventListener('input', e => {
   if(e.target.matches('.comment-field')) {
     e.target.style.height = 'auto';
     e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
   }
 });
+
+// اسم الصورة
+document.addEventListener('change', e => {
+  if(e.target.id === 'postImage') {
+    document.getElementById('imageName').textContent = e.target.files[0]?.name || '';
+  }
+});
+
+// Realtime
+function subscribeRealtime() {
+  db.channel('posts').on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'posts'},
+    () => loadPosts()
+  ).subscribe();
+}
+
+// تحديث آخر ظهور كل دقيقة
+setInterval(() => {
+  if(user) db.from('profiles').update({last_seen: new Date()}).eq('id', user.id);
+}, 60000);
 
 window.addEventListener('load', async () => {
   const { data } = await db.auth.getSession();
@@ -360,6 +501,7 @@ window.addEventListener('load', async () => {
     }
     showMain();
     loadPosts();
+    subscribeRealtime();
   }
 });
 </script>
