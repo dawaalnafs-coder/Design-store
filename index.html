@@ -486,7 +486,7 @@ async function loadComments(postId) {
         <div class="comment-head">
           <b>${userData.username}</b>
           <div style="display:flex;gap:5px">
-            <button class="btn-comment small" onclick="showReplyBox(${c.id}, this)">رد</button>
+            <button class="btn-comment small reply-btn" onclick="showReplyBox(${c.id}, this)">رد</button>
             ${deleteBtn}
           </div>
         </div>
