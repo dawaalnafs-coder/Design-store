@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منصتي - شبكة تواصل</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="light">
 
 <div id="notification" class="notification hidden"></div>
 
@@ -44,6 +44,7 @@
     <h3>منصتي 🛒</h3>
     <div style="display:flex;align-items:center;gap:10px">
       <button id="themeBtn">🌙</button>
+      <button id="notifBtn" onclick="showNotifications()">🔔<span id="notifCount" class="badge hidden">0</span></button>
       <button id="savedBtn" onclick="showSaved()">📌 المحفوظات</button>
       <span id="userEmail"></span>
       <button class="btn-danger" onclick="handleLogout()">خروج</button>
@@ -86,7 +87,9 @@ const db = supabase.createClient(supabaseUrl, supabaseKey);
 
 let user = null;
 let allPosts = [];
+let allUsers = [];
 const ADMIN_EMAIL = 'dawaahafs@gmail.com';
+const EMOJIS = ['😂','❤️','👍','😮','😢','🔥','💯','🙏'];
 
 function switchAuth(type) {
   document.getElementById('loginForm').classList.toggle('hidden', type!== 'login');
@@ -95,22 +98,20 @@ function switchAuth(type) {
   document.getElementById('registerTab').classList.toggle('active', type === 'register');
 }
 
-// دارك مود محسن + بيحفظ الاختيار
+// دارك مود محفوظ
 function initTheme() {
   const savedTheme = localStorage.getItem('theme') || 'light';
-  document.body.classList.add(savedTheme + '-mode');
+  document.body.className = savedTheme;
   document.getElementById('themeBtn').textContent = savedTheme === 'dark'? '☀️' : '🌙';
 
   document.getElementById('themeBtn').onclick = () => {
-    document.body.classList.toggle('dark-mode');
-    document.body.classList.toggle('light-mode');
-    const currentTheme = document.body.classList.contains('dark-mode')? 'dark' : 'light';
-    localStorage.setItem('theme', currentTheme);
-    document.getElementById('themeBtn').textContent = currentTheme === 'dark'? '☀️' : '🌙';
+    const newTheme = document.body.classList.contains('dark')? 'light' : 'dark';
+    document.body.className = newTheme;
+    localStorage.setItem('theme', newTheme);
+    document.getElementById('themeBtn').textContent = newTheme === 'dark'? '☀️' : '🌙';
   }
 }
 
-// حماية من XSS
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
@@ -164,6 +165,7 @@ async function handleLogin() {
 
   user = data.user;
   await db.from('profiles').update({last_seen: new Date()}).eq('id', user.id);
+  await loadAllUsers();
 
   const { data: banned } = await db.from('banned_users').select('*').eq('user_id', user.id).single();
   if(banned) {
@@ -174,6 +176,7 @@ async function handleLogin() {
   showMain();
   loadPosts();
   subscribeRealtime();
+  loadNotifications();
 }
 
 async function handleLogout() {
@@ -192,6 +195,11 @@ function showMain() {
   if(user.email === ADMIN_EMAIL) {
     document.getElementById('adminPanel').classList.remove('hidden');
   }
+}
+
+async function loadAllUsers() {
+  const { data } = await db.from('profiles').select('id, username');
+  allUsers = data || [];
 }
 
 async function createPost() {
@@ -227,14 +235,13 @@ async function createPost() {
 
 async function getUserData(userId) {
   const { data } = await db.from('profiles').select('gender, username, last_seen').eq('id', userId).single();
-  // Fallback لو البروفايل ناقص
   return data || {gender: 'M', username: `مستخدم_${userId.substring(0,6)}`, last_seen: null};
 }
 
 async function avatar(userId, lastSeen) {
   let userData = await getUserData(userId);
   let letter = userData.username[0].toUpperCase();
-  let color = userData.gender === 'F'? '#e91e63' : '#2196f3';
+  let color = userData.gender === 'F'? 'var(--pink)' : 'var(--blue)';
   let online = lastSeen && (new Date() - new Date(lastSeen)) < 60000;
   return `<div class="avatar" style="background:${color}">${letter}${online? '<span class="online-dot"></span>' : ''}</div>`;
 }
@@ -294,7 +301,7 @@ async function renderPosts(data) {
     postEl.innerHTML = `
       <div class="post-title">${escapeHtml(p.title)}</div>
       <div class="post-meta">${avatarHTML} <b>${userData.username}</b> | ${timeAgo(p.created_at)}</div>
-      <div class="post-content">${escapeHtml(p.content)}</div>
+      <div class="post-content">${parseMentions(escapeHtml(p.content))}</div>
       ${p.image_url? `<img src="${p.image_url}" class="post-image">` : ''}
       <div class="post-actions">
         ${user.email === ADMIN_EMAIL || user.id === p.user_id?
@@ -306,16 +313,70 @@ async function renderPosts(data) {
         <button class="btn-save ${isSaved? 'saved' : ''}" onclick="toggleSave(${p.id})">${isSaved? '📌 محفوظ' : '📌 حفظ'}</button>
       </div>
       <div id="comments-${p.id}" class="comments-box hidden">
+        <div class="emoji-box hidden" id="emoji-${p.id}"></div>
         <div class="whatsapp-input">
-          <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1" class="comment-field"></textarea>
+          <button onclick="toggleEmoji(${p.id})">😀</button>
+          <textarea id="input-${p.id}" placeholder="اكتب تعليق... @للمنشن" rows="1" class="comment-field" onkeyup="checkMention(event, ${p.id})"></textarea>
           <button onclick="addComment(${p.id}, null)">ᯓ➤</button>
         </div>
+        <div id="mention-${p.id}" class="mention-box hidden"></div>
         <div id="list-${p.id}" class="comments-list"></div>
       </div>
     `;
     list.appendChild(postEl);
     loadLikes(p.id);
+    loadEmojis(p.id);
   }
+}
+
+function loadEmojis(postId) {
+  const box = document.getElementById(`emoji-${postId}`);
+  box.innerHTML = EMOJIS.map(e => `<span onclick="addEmoji(${postId}, '${e}')">${e}</span>`).join('');
+}
+
+function toggleEmoji(postId) {
+  document.getElementById(`emoji-${postId}`).classList.toggle('hidden');
+}
+
+function addEmoji(postId, emoji) {
+  const input = document.getElementById(`input-${postId}`);
+  input.value += emoji;
+  input.focus();
+}
+
+function checkMention(e, postId) {
+  const input = e.target;
+  const text = input.value;
+  const lastAt = text.lastIndexOf('@');
+
+  if(lastAt!== -1 && e.key!== ' ') {
+    const search = text.substring(lastAt + 1).toLowerCase();
+    const matches = allUsers.filter(u => u.username.toLowerCase().includes(search)).slice(0, 5);
+
+    const box = document.getElementById(`mention-${postId}`);
+    if(matches.length > 0) {
+      box.innerHTML = matches.map(u =>
+        `<div onclick="selectMention(${postId}, ${lastAt}, '${u.username}')">@${u.username}</div>`
+      ).join('');
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+    }
+  } else {
+    document.getElementById(`mention-${postId}`).classList.add('hidden');
+  }
+}
+
+function selectMention(postId, pos, username) {
+  const input = document.getElementById(`input-${postId}`);
+  const text = input.value;
+  input.value = text.substring(0, pos) + `@${username} ` + text.substring(pos + username.length + 1);
+  document.getElementById(`mention-${postId}`).classList.add('hidden');
+  input.focus();
+}
+
+function parseMentions(text) {
+  return text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
 }
 
 async function toggleSave(postId) {
@@ -379,12 +440,12 @@ async function addComment(postId, parentId) {
   const commentText = input.value.trim();
   if(!commentText) return alert('اكتب تعليق الأول');
 
-  const { error } = await db.from('comments').insert({
+  const { data: newComment, error } = await db.from('comments').insert({
     post_id: postId,
     content: commentText,
     user_id: user.id,
     parent_id: parentId
-  });
+  }).select().single();
 
   if(error) {
     alert('خطأ: ' + error.message);
@@ -392,7 +453,25 @@ async function addComment(postId, parentId) {
     input.value = '';
     input.style.height = 'auto';
     if(parentId) document.getElementById(`reply-box-${parentId}`)?.remove();
+
+    // إشعار للرد
+    if(parentId) {
+      const { data: parent } = await db.from('comments').select('user_id').eq('id', parentId).single();
+      if(parent && parent.user_id!== user.id) {
+        await db.from('notifications').insert({
+          user_id: parent.user_id,
+          type: 'reply',
+          post_id: postId,
+          comment_id: parentId,
+          from_user: user.id,
+          content: commentText.substring(0, 30) + '...',
+          read: false
+        });
+      }
+    }
+
     loadComments(postId);
+    showNotification(parentId? '💬 تم الرد' : '💬 تم التعليق');
   }
 }
 
@@ -410,15 +489,43 @@ function showReplyBox(commentId, btn) {
   btn.textContent = 'إلغاء';
 
   const postId = btn.closest('.post-item').querySelector('[id^="comments-"]').id.replace('comments-', '');
-  
+
   const html = `
     <div id="reply-box-${commentId}" class="whatsapp-input" style="margin-top:8px;margin-right:50px">
-      <textarea id="reply-${commentId}" placeholder="اكتب ردك..." rows="1" class="comment-field"></textarea>
+      <button onclick="toggleEmojiReply(${commentId})">😀</button>
+      <textarea id="reply-${commentId}" placeholder="اكتب ردك... @للمنشن" rows="1" class="comment-field" onkeyup="checkMention(event, ${postId})"></textarea>
       <button onclick="addComment(${postId}, ${commentId})">ᯓ➤</button>
     </div>
+    <div id="emoji-reply-${commentId}" class="emoji-box hidden"></div>
   `;
   document.getElementById(`comment-${commentId}`).insertAdjacentHTML('afterend', html);
   document.getElementById(`reply-${commentId}`).focus();
+  loadEmojisReply(commentId);
+}
+
+function loadEmojisReply(commentId) {
+  const box = document.getElementById(`emoji-reply-${commentId}`);
+  box.innerHTML = EMOJIS.map(e => `<span onclick="addEmojiReply(${commentId}, '${e}')">${e}</span>`).join('');
+}
+
+function toggleEmojiReply(commentId) {
+  document.getElementById(`emoji-reply-${commentId}`).classList.toggle('hidden');
+}
+
+function addEmojiReply(commentId, emoji) {
+  const input = document.getElementById(`reply-${commentId}`);
+  input.value += emoji;
+  input.focus();
+}
+
+async function editComment(commentId) {
+  const newText = prompt('عدل تعليقك:');
+  if(newText && newText.trim()) {
+    await db.from('comments').update({content: newText.trim()}).eq('id', commentId);
+    const postId = document.querySelector(`#comment-${commentId}`).closest('[id^="comments-"]').id.replace('comments-', '');
+    loadComments(postId);
+    showNotification('✏️ تم التعديل');
+  }
 }
 
 async function deleteComment(commentId, postId) {
@@ -427,15 +534,14 @@ async function deleteComment(commentId, postId) {
   loadComments(postId);
 }
 
-// دالة التعليقات المحسنة 100%
 async function loadComments(postId) {
   const list = document.getElementById(`list-${postId}`);
   list.innerHTML = '<small style="color:#999">جاري التحميل...</small>';
 
   const { data, error } = await db.from('comments')
-  .select('id, content, created_at, user_id, parent_id, profiles(username, gender, last_seen)')
-  .eq('post_id', postId)
-  .order('created_at', { ascending: true });
+ .select('id, content, created_at, user_id, parent_id, profiles(username, gender, last_seen)')
+ .eq('post_id', postId)
+ .order('created_at', { ascending: true });
 
   if(error) {
     list.innerHTML = '<small style="color:red">فشل التحميل</small>';
@@ -454,23 +560,32 @@ async function loadComments(postId) {
     let userData = c.profiles || {username: `مستخدم_${c.user_id.substring(0,6)}`, gender: 'M', last_seen: null};
     let avatarHTML = await avatar(c.user_id, userData.last_seen);
     let deleteBtn = (user.email === ADMIN_EMAIL || user.id === c.user_id)
-    ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
+   ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
+    let editBtn = (user.id === c.user_id)
+   ? `<button class="btn-comment small" onclick="editComment(${c.id})">✏️</button>` : '';
 
     let replies = data.filter(r => r.parent_id === c.id);
     let repliesHTML = '';
     for(let r of replies) {
       let rUser = r.profiles || {username: `مستخدم_${r.user_id.substring(0,6)}`, gender: 'M', last_seen: null};
       let rAvatar = await avatar(r.user_id, rUser.last_seen);
+      let rDeleteBtn = (user.email === ADMIN_EMAIL || user.id === r.user_id)
+     ? `<button class="btn-danger small" onclick="deleteComment(${r.id}, ${postId})">🗑️</button>` : '';
+      let rEditBtn = (user.id === r.user_id)
+     ? `<button class="btn-comment small" onclick="editComment(${r.id})">✏️</button>` : '';
+
       repliesHTML += `
-        <div class="comment-item" style="margin-right:40px;margin-top:8px;border-right:2px solid #ddd;padding-right:10px">
+        <div class="comment-item reply" id="comment-${r.id}">
           ${rAvatar}
           <div class="comment-body">
             <div class="comment-head">
               <b>${rUser.username}</b>
-              ${(user.email === ADMIN_EMAIL || user.id === r.user_id)
-              ? `<button class="btn-danger small" onclick="deleteComment(${r.id}, ${postId})">🗑️</button>` : ''}
+              <div style="display:flex;gap:5px">
+                ${rEditBtn}
+                ${rDeleteBtn}
+              </div>
             </div>
-            <div class="comment-text">${escapeHtml(r.content)}</div>
+            <div class="comment-text">${parseMentions(escapeHtml(r.content))}</div>
             <span class="time-ago">${timeAgo(r.created_at)}</span>
           </div>
         </div>
@@ -487,16 +602,58 @@ async function loadComments(postId) {
           <b>${userData.username}</b>
           <div style="display:flex;gap:5px">
             <button class="btn-comment small reply-btn" onclick="showReplyBox(${c.id}, this)">رد</button>
+            ${editBtn}
             ${deleteBtn}
           </div>
         </div>
-        <div class="comment-text">${escapeHtml(c.content)}</div>
+        <div class="comment-text">${parseMentions(escapeHtml(c.content))}</div>
         <span class="time-ago">${timeAgo(c.created_at)}</span>
         ${repliesHTML}
       </div>
     `;
     list.appendChild(commentEl);
   }
+}
+
+async function loadNotifications() {
+  if(!user) return;
+  const { data, count } = await db.from('notifications')
+   .select('*', {count: 'exact'})
+   .eq('user_id', user.id)
+   .eq('read', false)
+   .order('created_at', {ascending: false})
+   .limit(10);
+
+  const badge = document.getElementById('notifCount');
+  if(count > 0) {
+    badge.textContent = count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+async function showNotifications() {
+  const { data } = await db.from('notifications')
+   .select('*, profiles!from_user(username)')
+   .eq('user_id', user.id)
+   .order('created_at', {ascending: false})
+   .limit(10);
+
+  if(!data || data.length === 0) {
+    alert('لا توجد إشعارات');
+    return;
+  }
+
+  let msg = '🔔 الإشعارات:\n\n';
+  data.forEach(n => {
+    const from = n.profiles?.username || 'مستخدم';
+    msg += `${from}: رد عليك "${n.content}"\n`;
+  });
+  alert(msg);
+
+  await db.from('notifications').update({read: true}).eq('user_id', user.id);
+  loadNotifications();
 }
 
 function showAlert(id, msg, type) {
@@ -523,6 +680,10 @@ document.addEventListener('change', e => {
 function subscribeRealtime() {
   db.channel('posts').on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'posts'},
     () => loadPosts()
+  ).subscribe();
+
+  db.channel('notifications').on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}`},
+    () => loadNotifications()
   ).subscribe();
 }
 
