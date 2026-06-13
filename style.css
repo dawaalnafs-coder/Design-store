@@ -211,6 +211,8 @@ button:hover {
   top: 5px;
   right: 5px;
   font-weight: bold;
+  min-width: 18px;
+  text-align: center;
 }
 #notifBtn { position: relative; }
 
