@@ -321,7 +321,7 @@ async function deleteComment(commentId, postId) {
 
 async function loadComments(postId) {
   const { data, error } = await db.from('comments')
-.select('id, content, created_at, user_id, profiles(gender, username)')
+.select('id, content, created_at, user_id, profiles(gender)')
 .eq('post_id', postId)
 .order('created_at', { ascending: true });
 
