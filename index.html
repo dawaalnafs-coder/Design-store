@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منصتي - شبكة تواصل</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
   <div class="header">
     <h3>منصتي 🛒</h3>
     <div style="display:flex;align-items:center;gap:10px">
-      <button id="themeBtn" onclick="toggleTheme()">🌙</button>
+      <button id="themeBtn">🌙</button>
       <button id="savedBtn" onclick="showSaved()">📌 المحفوظات</button>
       <span id="userEmail"></span>
       <button class="btn-danger" onclick="handleLogout()">خروج</button>
@@ -95,15 +95,28 @@ function switchAuth(type) {
   document.getElementById('registerTab').classList.toggle('active', type === 'register');
 }
 
-// دارك مود
-function toggleTheme() {
-  document.body.classList.toggle('dark');
-  const btn = document.getElementById('themeBtn');
-  btn.textContent = document.body.classList.contains('dark')? '☀️' : '🌙';
-  localStorage.setItem('theme', document.body.classList.contains('dark')? 'dark' : 'light');
+// دارك مود محسن + بيحفظ الاختيار
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.body.classList.add(savedTheme + '-mode');
+  document.getElementById('themeBtn').textContent = savedTheme === 'dark'? '☀️' : '🌙';
+
+  document.getElementById('themeBtn').onclick = () => {
+    document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('light-mode');
+    const currentTheme = document.body.classList.contains('dark-mode')? 'dark' : 'light';
+    localStorage.setItem('theme', currentTheme);
+    document.getElementById('themeBtn').textContent = currentTheme === 'dark'? '☀️' : '🌙';
+  }
 }
 
-// إشعار
+// حماية من XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 function showNotification(msg) {
   const n = document.getElementById('notification');
   n.textContent = msg;
@@ -124,23 +137,16 @@ async function handleRegister() {
   if(error) return showAlert('authAlert', '❌ ' + error.message, 'error');
 
   if(data.user) {
-    // نعمل البروفايل فورا حتى لو الإيميل لسه متفعلش
-    const { error: profileError } = await db.from('profiles').insert({ 
-      id: data.user.id, 
-      username: username, 
+    await db.from('profiles').insert({
+      id: data.user.id,
+      username: username,
       gender: gender,
       created_at: new Date(),
       last_seen: new Date()
     });
-    
-    if(profileError) {
-      console.log('خطأ بروفايل:', profileError.message);
-    }
   }
-  
-  showAlert('authAlert', '✅ تم التسجيل! تقدر تدخل دلوقتي حتى لو الإيميل وهمي', 'success');
-  
-  // ندخل اليوزر أوتوماتيك بعد التسجيل عشان ميحتاجش يفعل الإيميل
+
+  showAlert('authAlert', '✅ تم التسجيل! تقدر تدخل دلوقتي', 'success');
   setTimeout(() => {
     document.getElementById('loginEmail').value = email;
     document.getElementById('loginPassword').value = password;
@@ -171,7 +177,7 @@ async function handleLogin() {
 }
 
 async function handleLogout() {
-  await db.from('profiles').update({last_seen: new Date()}).eq('id', user.id);
+  if(user) await db.from('profiles').update({last_seen: new Date()}).eq('id', user.id);
   await db.auth.signOut();
   user = null;
   document.getElementById('authSection').classList.remove('hidden');
@@ -182,10 +188,7 @@ function showMain() {
   document.getElementById('authSection').classList.add('hidden');
   document.getElementById('mainSection').classList.remove('hidden');
   document.getElementById('userEmail').textContent = user.email;
-  if(localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark');
-    document.getElementById('themeBtn').textContent = '☀️';
-  }
+  initTheme();
   if(user.email === ADMIN_EMAIL) {
     document.getElementById('adminPanel').classList.remove('hidden');
   }
@@ -224,13 +227,14 @@ async function createPost() {
 
 async function getUserData(userId) {
   const { data } = await db.from('profiles').select('gender, username, last_seen').eq('id', userId).single();
-  return data || {gender: 'M', username: 'مجهول', last_seen: null};
+  // Fallback لو البروفايل ناقص
+  return data || {gender: 'M', username: `مستخدم_${userId.substring(0,6)}`, last_seen: null};
 }
 
 async function avatar(userId, lastSeen) {
   let userData = await getUserData(userId);
-  let letter = userData.username? userData.username[0].toUpperCase() : 'U';
-  let color = userData.gender === 'F'? 'var(--pink)' : 'var(--blue)';
+  let letter = userData.username[0].toUpperCase();
+  let color = userData.gender === 'F'? '#e91e63' : '#2196f3';
   let online = lastSeen && (new Date() - new Date(lastSeen)) < 60000;
   return `<div class="avatar" style="background:${color}">${letter}${online? '<span class="online-dot"></span>' : ''}</div>`;
 }
@@ -279,39 +283,39 @@ async function renderPosts(data) {
     return;
   }
 
-  let html = '';
+  list.innerHTML = '';
   for(let p of data) {
     let userData = await getUserData(p.user_id);
     let avatarHTML = await avatar(p.user_id, userData.last_seen);
     let isSaved = p.saved_by?.includes(user.id);
 
-    html += `
-      <div class="post-item">
-        <div class="post-title">${p.title}</div>
-        <div class="post-meta">${avatarHTML} <b>${userData.username}</b> | ${timeAgo(p.created_at)}</div>
-        <div class="post-content">${p.content}</div>
-        ${p.image_url? `<img src="${p.image_url}" class="post-image">` : ''}
-        <div class="post-actions">
-          ${user.email === ADMIN_EMAIL || user.id === p.user_id?
-            `<button class="btn-danger" onclick="deletePost(${p.id})">🗑️ حذف</button>` : ''}
-          ${user.email!== ADMIN_EMAIL?
-            `<button class="btn-warn" onclick="reportPost(${p.id})">🚩 إبلاغ</button>` : ''}
-          <button class="btn-like" onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
-          <button class="btn-comment" onclick="toggleComments(${p.id})">💬 تعليقات</button>
-          <button class="btn-save ${isSaved? 'saved' : ''}" onclick="toggleSave(${p.id})">${isSaved? '📌 محفوظ' : '📌 حفظ'}</button>
+    const postEl = document.createElement('div');
+    postEl.className = 'post-item';
+    postEl.innerHTML = `
+      <div class="post-title">${escapeHtml(p.title)}</div>
+      <div class="post-meta">${avatarHTML} <b>${userData.username}</b> | ${timeAgo(p.created_at)}</div>
+      <div class="post-content">${escapeHtml(p.content)}</div>
+      ${p.image_url? `<img src="${p.image_url}" class="post-image">` : ''}
+      <div class="post-actions">
+        ${user.email === ADMIN_EMAIL || user.id === p.user_id?
+          `<button class="btn-danger" onclick="deletePost(${p.id})">🗑️ حذف</button>` : ''}
+        ${user.email!== ADMIN_EMAIL?
+          `<button class="btn-warn" onclick="reportPost(${p.id})">🚩 إبلاغ</button>` : ''}
+        <button class="btn-like" onclick="toggleLike(${p.id})" id="like-${p.id}">❤️ 0</button>
+        <button class="btn-comment" onclick="toggleComments(${p.id})">💬 تعليقات</button>
+        <button class="btn-save ${isSaved? 'saved' : ''}" onclick="toggleSave(${p.id})">${isSaved? '📌 محفوظ' : '📌 حفظ'}</button>
+      </div>
+      <div id="comments-${p.id}" class="comments-box hidden">
+        <div class="whatsapp-input">
+          <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1" class="comment-field"></textarea>
+          <button onclick="addComment(${p.id}, null)">ᯓ➤</button>
         </div>
-        <div id="comments-${p.id}" class="comments-box hidden">
-          <div class="whatsapp-input">
-            <textarea id="input-${p.id}" placeholder="اكتب تعليق..." rows="1" class="comment-field"></textarea>
-            <button onclick="addComment(${p.id}, null)">ᯓ➤</button>
-          </div>
-          <div id="list-${p.id}" class="comments-list"></div>
-        </div>
+        <div id="list-${p.id}" class="comments-list"></div>
       </div>
     `;
+    list.appendChild(postEl);
+    loadLikes(p.id);
   }
-  list.innerHTML = html;
-  data.forEach(p => loadLikes(p.id));
 }
 
 async function toggleSave(postId) {
@@ -387,9 +391,8 @@ async function addComment(postId, parentId) {
   } else {
     input.value = '';
     input.style.height = 'auto';
-    if(parentId) document.getElementById(`reply-box-${parentId}`).remove();
+    if(parentId) document.getElementById(`reply-box-${parentId}`)?.remove();
     loadComments(postId);
-    if(user.email!== user.email) showNotification('💬 تعليق جديد');
   }
 }
 
@@ -400,7 +403,7 @@ function replyTo(commentId, username) {
   const html = `
     <div id="reply-box-${commentId}" class="whatsapp-input" style="margin-top:8px;margin-right:50px">
       <textarea id="reply-${commentId}" placeholder="رد على ${username}..." rows="1" class="comment-field"></textarea>
-      <button onclick="addComment(null, ${commentId})">ᯓ➤</button>
+      <button onclick="addComment(${null}, ${commentId})">ᯓ➤</button>
     </div>
   `;
   document.getElementById(`comment-${commentId}`).insertAdjacentHTML('afterend', html);
@@ -412,66 +415,76 @@ async function deleteComment(commentId, postId) {
   loadComments(postId);
 }
 
+// دالة التعليقات المحسنة 100%
 async function loadComments(postId) {
-  const { data } = await db.from('comments')
-   .select('id, content, created_at, user_id, parent_id, profiles(username, gender, last_seen)')
-   .eq('post_id', postId)
-   .order('created_at', { ascending: true });
-
   const list = document.getElementById(`list-${postId}`);
+  list.innerHTML = '<small style="color:#999">جاري التحميل...</small>';
+
+  const { data, error } = await db.from('comments')
+  .select('id, content, created_at, user_id, parent_id, profiles(username, gender, last_seen)')
+  .eq('post_id', postId)
+  .order('created_at', { ascending: true });
+
+  if(error) {
+    list.innerHTML = '<small style="color:red">فشل التحميل</small>';
+    return;
+  }
+
   if(!data || data.length === 0) {
     list.innerHTML = '<small style="color:#999">لا توجد تعليقات بعد</small>';
     return;
   }
 
-  let commentsHTML = '';
-  for(let c of data) {
-    if(c.parent_id) continue; // هنعرض الردود تحتها
-    let userData = c.profiles || {username: 'مجهول', gender: 'M', last_seen: null};
+  list.innerHTML = '';
+  const comments = data.filter(c =>!c.parent_id);
+
+  for(let c of comments) {
+    let userData = c.profiles || {username: `مستخدم_${c.user_id.substring(0,6)}`, gender: 'M', last_seen: null};
     let avatarHTML = await avatar(c.user_id, userData.last_seen);
     let deleteBtn = (user.email === ADMIN_EMAIL || user.id === c.user_id)
-     ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
+    ? `<button class="btn-danger small" onclick="deleteComment(${c.id}, ${postId})">🗑️</button>` : '';
 
     let replies = data.filter(r => r.parent_id === c.id);
     let repliesHTML = '';
     for(let r of replies) {
-      let rUser = r.profiles || {username: 'مجهول', gender: 'M', last_seen: null};
+      let rUser = r.profiles || {username: `مستخدم_${r.user_id.substring(0,6)}`, gender: 'M', last_seen: null};
       let rAvatar = await avatar(r.user_id, rUser.last_seen);
       repliesHTML += `
-        <div class="comment-item" style="margin-right:40px;margin-top:8px">
+        <div class="comment-item" style="margin-right:40px;margin-top:8px;border-right:2px solid #ddd;padding-right:10px">
           ${rAvatar}
           <div class="comment-body">
             <div class="comment-head">
               <b>${rUser.username}</b>
               ${(user.email === ADMIN_EMAIL || user.id === r.user_id)
-               ? `<button class="btn-danger small" onclick="deleteComment(${r.id}, ${postId})">🗑️</button>` : ''}
+              ? `<button class="btn-danger small" onclick="deleteComment(${r.id}, ${postId})">🗑️</button>` : ''}
             </div>
-            <div class="comment-text">${r.content}</div>
+            <div class="comment-text">${escapeHtml(r.content)}</div>
             <span class="time-ago">${timeAgo(r.created_at)}</span>
           </div>
         </div>
       `;
     }
 
-    commentsHTML += `
-      <div id="comment-${c.id}" class="comment-item">
-        ${avatarHTML}
-        <div class="comment-body">
-          <div class="comment-head">
-            <b>${userData.username}</b>
-            <div style="display:flex;gap:5px">
-              <button class="btn-comment small" onclick="replyTo(${c.id}, '${userData.username}')">رد</button>
-              ${deleteBtn}
-            </div>
+    const commentEl = document.createElement('div');
+    commentEl.id = `comment-${c.id}`;
+    commentEl.className = 'comment-item';
+    commentEl.innerHTML = `
+      ${avatarHTML}
+      <div class="comment-body">
+        <div class="comment-head">
+          <b>${userData.username}</b>
+          <div style="display:flex;gap:5px">
+            <button class="btn-comment small" onclick="replyTo(${c.id}, '${userData.username}')">رد</button>
+            ${deleteBtn}
           </div>
-          <div class="comment-text">${c.content}</div>
-          <span class="time-ago">${timeAgo(c.created_at)}</span>
-          ${repliesHTML}
         </div>
+        <div class="comment-text">${escapeHtml(c.content)}</div>
+        <span class="time-ago">${timeAgo(c.created_at)}</span>
+        ${repliesHTML}
       </div>
     `;
+    list.appendChild(commentEl);
   }
-  list.innerHTML = commentsHTML;
 }
 
 function showAlert(id, msg, type) {
@@ -482,7 +495,6 @@ function showAlert(id, msg, type) {
   setTimeout(() => el.style.display = 'none', 3000);
 }
 
-// تكبير الخانة
 document.addEventListener('input', e => {
   if(e.target.matches('.comment-field')) {
     e.target.style.height = 'auto';
@@ -490,21 +502,18 @@ document.addEventListener('input', e => {
   }
 });
 
-// اسم الصورة
 document.addEventListener('change', e => {
   if(e.target.id === 'postImage') {
     document.getElementById('imageName').textContent = e.target.files[0]?.name || '';
   }
 });
 
-// Realtime
 function subscribeRealtime() {
   db.channel('posts').on('postgres_changes', {event: 'INSERT', schema: 'public', table: 'posts'},
     () => loadPosts()
   ).subscribe();
 }
 
-// تحديث آخر ظهور كل دقيقة
 setInterval(() => {
   if(user) db.from('profiles').update({last_seen: new Date()}).eq('id', user.id);
 }, 60000);
