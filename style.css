@@ -16,6 +16,34 @@
 body {
   background: var(--bg);
   color: var(--text);
+  transition: background 0.3s;
+}
+
+/* دارك مود */
+body.dark {
+  --bg: #1a1a2e;
+  --text: #e0e0e0;
+}
+
+body.dark.card {
+  background: #16213e;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+body.dark input,
+body.dark textarea,
+body.dark select {
+  background: #0f3460;
+  border-color: #2a2a4e;
+  color: #e0e0e0;
+}
+
+body.dark.whatsapp-input {
+  background: #0f3460;
+}
+
+body.dark.comment-item {
+  background: #0f3460;
 }
 
 .header {
@@ -43,6 +71,7 @@ body {
   padding: 22px;
   margin-bottom: 18px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  transition: background 0.3s;
 }
 
 input, textarea, select {
@@ -113,6 +142,22 @@ button:hover {
   border: 2px solid #e0e7ff;
 }
 
+.btn-comment.small {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.btn-save {
+  background: #f0fff4;
+  color: #27ae60;
+  border: 2px solid #d5f4e6;
+}
+
+.btn-save.saved {
+  background: #27ae60;
+  color: white;
+}
+
 .btn-danger.small {
   padding: 6px 10px;
   font-size: 12px;
@@ -123,6 +168,14 @@ button:hover {
 .post-item {
   border-bottom: 1px solid #f0f0f0;
   padding: 20px 0;
+}
+
+.post-image {
+  width: 100%;
+  border-radius: 12px;
+  margin: 10px 0;
+  max-height: 400px;
+  object-fit: cover;
 }
 
 .post-title {
@@ -150,6 +203,18 @@ button:hover {
   justify-content: center;
   font-weight: bold;
   font-size: 15px;
+  position: relative;
+}
+
+.online-dot {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background: #2ecc71;
+  border-radius: 50%;
+  border: 2px solid white;
 }
 
 .post-content {
@@ -166,7 +231,7 @@ button:hover {
   flex-wrap: wrap;
 }
 
-/* ===== تصميم واتساب للتعليقات ===== */
+/* واتساب انبوت */
 .comments-box {
   margin-top: 18px;
   padding-top: 18px;
@@ -198,7 +263,6 @@ button:hover {
   margin: 0!important;
 }
 
-/* زرار الإرسال الدايرة */
 .whatsapp-input button {
   width: 44px!important;
   height: 44px!important;
@@ -295,8 +359,35 @@ button:hover {
   color: white;
 }
 
+#themeBtn {
+  background: transparent;
+  font-size: 24px;
+  padding: 5px 10px;
+  color: white;
+}
+
+#savedBtn {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.notification {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2ecc71;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+
 @media (max-width: 600px) {
 .container { padding: 0 12px; margin: 15px auto; }
 .card { padding: 16px; }
-  button { padding: 12px 18px; font-size: 14px; }
+button { padding: 12px 18px; font-size: 14px; }
 }
