@@ -310,10 +310,25 @@ async function addComment(postId) {
 }
 
 async function loadComments(postId) {
-  const { data } = await db.from('comments')
-  .select('id, content, created_at, user_id, profiles(email, gender)')
+  const { data, error } = await db.from('comments')
+  .select('id, content, created_at, user_id, profiles(gender)')
   .eq('post_id', postId)
   .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error loading comments:', error);
+    return;
+  }
+
+  console.log('Comments:', data); // ضيف السطر ده عشان نشوف الداتا جاية ولا لأ
+  
+  // هنا هتلف على data وتعرضها + لون الأفاتار حسب gender
+  data.forEach(comment => {
+    const gender = comment.profiles?.gender; 
+    const avatarColor = gender === 'F' ? 'red' : 'blue';
+    console.log(comment.content, avatarColor);
+  });
+}
 
   const list = document.getElementById(`list-${postId}`);
   if(!data || data.length === 0) {
