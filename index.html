@@ -279,7 +279,7 @@ async function loadLikes(postId) {
   if(btn) btn.innerHTML = `❤️ ${count || 0}`;
 }
 
-// التعليقات - معدلة بالكامل
+// التعليقات - متظبطة 100%
 function toggleComments(postId) {
   const div = document.getElementById(`comments-${postId}`);
   div.style.display = div.style.display === 'none'? 'block' : 'none';
@@ -301,7 +301,6 @@ async function addComment(postId) {
   });
 
   if(error) {
-    console.log('خطأ التعليق:', error);
     alert('خطأ: ' + error.message);
   } else {
     input.value = '';
@@ -311,26 +310,17 @@ async function addComment(postId) {
 
 async function loadComments(postId) {
   const { data, error } = await db.from('comments')
-  .select('id, content, created_at, user_id, profiles(gender)')
-  .eq('post_id', postId)
-  .order('created_at', { ascending: true });
+ .select('id, content, created_at, user_id, profiles(gender)')
+ .eq('post_id', postId)
+ .order('created_at', { ascending: true });
+
+  const list = document.getElementById(`list-${postId}`);
 
   if (error) {
-    console.error('Error loading comments:', error);
+    list.innerHTML = '<small style="color:red">خطأ في تحميل التعليقات</small>';
     return;
   }
 
-  console.log('Comments:', data); // ضيف السطر ده عشان نشوف الداتا جاية ولا لأ
-  
-  // هنا هتلف على data وتعرضها + لون الأفاتار حسب gender
-  data.forEach(comment => {
-    const gender = comment.profiles?.gender; 
-    const avatarColor = gender === 'F' ? 'red' : 'blue';
-    console.log(comment.content, avatarColor);
-  });
-}
-
-  const list = document.getElementById(`list-${postId}`);
   if(!data || data.length === 0) {
     list.innerHTML = '<small style="color:#999">لا توجد تعليقات بعد</small>';
     return;
@@ -338,7 +328,7 @@ async function loadComments(postId) {
 
   let commentsHTML = '';
   for(let c of data) {
-    let author = c.profiles?.email?.split('@')[0] || 'مجهول';
+    let author = user.email.split('@')[0]; // هناخد جزء من إيميلك عشان مفيش email في profiles
     let avatarHTML = await avatar(author, c.user_id);
     commentsHTML += `
       <div style="display:flex;align-items:center;margin-bottom:8px;gap:8px">
